@@ -25,12 +25,12 @@ type SimplifiedAlbum struct {
 
 type FullAlbum struct {
 	SimplifiedAlbum
-	Tracks      []SimplifiedTrackChunk `json:"tracks"`
-	Copyrights  Copyright              `json:"copyrights"`
-	ExternalIds ExternalId             `json:"external_ids"`
-	Genres      []string               `json:"genres"`
-	Label       string                 `json:"label"`
-	Popularity  int                    `json:"popularity"`
+	Tracks      SimplifiedTrackChunk `json:"tracks"`
+	Copyrights  []Copyright          `json:"copyrights"`
+	ExternalIds ExternalId           `json:"external_ids"`
+	Genres      []string             `json:"genres"`
+	Label       string               `json:"label"`
+	Popularity  int                  `json:"popularity"`
 }
 
 type Copyright struct {
@@ -48,12 +48,14 @@ func (s *Spotify) GetAlbum(id string, params ...Param) (*FullAlbum, error) {
 }
 
 func (s *Spotify) GetAlbums(ids []string, params ...Param) ([]*FullAlbum, error) {
-	albums := []*FullAlbum{}
-	err := s.Get(albums, "/albums?ids="+strings.Join(ids, ","), params...)
+	var w struct {
+		Albums []*FullAlbum `json:"albums"`
+	}
+	err := s.Get(&w, "/albums?ids="+strings.Join(ids, ","), params...)
 	if err != nil {
 		return nil, err
 	}
-	return albums, nil
+	return w.Albums, nil
 }
 
 func (s *Spotify) GetAlbumTracks(id string, params ...Param) (*SimplifiedTrackChunk, error) {
