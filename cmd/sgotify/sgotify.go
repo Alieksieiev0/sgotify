@@ -24,5 +24,16 @@ func main() {
 	}
 
 	spotify := api.NewSpotifyClient(ctx, token)
-	spotify.GetArtists([]string{"0TnOYISbd1XYRBk9myaseg", "57dN52uHvrHOxijzpIgu3E"})
+	artist, err := spotify.GetArtist("57dN52uHvrHOxijzpIgu3E")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(artist)
+	artists, err := spotify.GetArtists([]string{"0TnOYISbd1XYRBk9myaseg", "57dN52uHvrHOxijzpIgu3E"})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(artists)
 }

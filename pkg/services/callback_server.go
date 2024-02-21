@@ -25,7 +25,7 @@ func runCallbackServer(code *string) {
 	}()
 
 	if err := s.ListenAndServe(); err != nil {
-		fmt.Println("HTTP server listener error: ", err)
+		fmt.Println("Callback Server Closed")
 	}
 }
 

@@ -44,8 +44,15 @@ func Test_GetArtists(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sourceArtists := []*FullArtist{}
-	testDiffs(t, body, &sourceArtists, &artists)
+	type w struct {
+		Artists []*FullArtist
+	}
+
+	targetWrapper := &w{
+		Artists: artists,
+	}
+	sourceWrapper := &w{}
+	testDiffs(t, body, &sourceWrapper, &targetWrapper)
 }
 
 func Test_GetArtistAlbums(t *testing.T) {
@@ -80,8 +87,14 @@ func Test_GetArtisTopTracks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sourceTopTracks := []*FullTrack{}
-	testDiffs(t, body, &sourceTopTracks, &topTracks)
+
+	type w struct {
+		Tracks []*FullTrack
+	}
+
+	targetWrapper := &w{topTracks}
+	sourceWrapper := &w{}
+	testDiffs(t, body, &sourceWrapper, &targetWrapper)
 }
 
 func Test_GetArtisRelatedArtists(t *testing.T) {
@@ -98,14 +111,12 @@ func Test_GetArtisRelatedArtists(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	type wrapper struct {
-		Artists []*FullArtist `json:"artists"`
+	type w struct {
+		Artists []*FullArtist
 	}
 
-	targetWrapper := &wrapper{
-		Artists: relatedArtists,
-	}
-	sourceWrapper := &wrapper{}
+	targetWrapper := &w{relatedArtists}
+	sourceWrapper := &w{}
 
 	testDiffs(t, body, sourceWrapper, targetWrapper)
 }

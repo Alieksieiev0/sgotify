@@ -56,3 +56,5 @@ func RedirectURL(url string) option {
 		s.conf.RedirectURL = url
 	}
 }
+
+// Add scopes by using conf.Scopes

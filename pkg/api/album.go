@@ -1,5 +1,11 @@
 package api
 
+import (
+	"bytes"
+	"fmt"
+	"strings"
+)
+
 type SimplifiedAlbum struct {
 	AlbumType            string             `json:"album_type"`
 	TotalTracks          int                `json:"total_tracks"`
@@ -30,4 +36,74 @@ type FullAlbum struct {
 type Copyright struct {
 	Text string `json:"text"`
 	Type string `json:"type"`
+}
+
+func (s *Spotify) GetAlbum(id string, params ...Param) (*FullAlbum, error) {
+	album := &FullAlbum{}
+	err := s.Get(album, fmt.Sprintf("/albums/%s", id), params...)
+	if err != nil {
+		return nil, err
+	}
+	return album, nil
+}
+
+func (s *Spotify) GetAlbums(ids []string, params ...Param) ([]*FullAlbum, error) {
+	albums := []*FullAlbum{}
+	err := s.Get(albums, "/albums?ids="+strings.Join(ids, ","), params...)
+	if err != nil {
+		return nil, err
+	}
+	return albums, nil
+}
+
+func (s *Spotify) GetAlbumTracks(id string, params ...Param) (*SimplifiedTrackChunk, error) {
+	trackChunck := &SimplifiedTrackChunk{}
+	err := s.Get(trackChunck, "/albums/"+id+"/tracks", params...)
+	if err != nil {
+		return nil, err
+	}
+	return trackChunck, nil
+}
+
+func (s *Spotify) GetUserSavedAlbums(params ...Param) ([]*FullAlbum, error) {
+	albums := []*FullAlbum{}
+	err := s.Get(albums, "/me/albums", params...)
+	if err != nil {
+		return nil, err
+	}
+	return albums, nil
+}
+
+func (s *Spotify) SaveAlbumsForCurrentUser(ids []string) error {
+	err := s.Put("/me/albums?ids="+strings.Join(ids, ","), bytes.NewBuffer([]byte{}))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Spotify) RemoveUserSavedAlbums(ids []string) error {
+	err := s.Delete("/me/albums?ids="+strings.Join(ids, ","), bytes.NewBuffer([]byte{}))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Spotify) CheckUserSavedAlbums(ids []string) ([]*bool, error) {
+	albums := []*bool{}
+	err := s.Get(albums, "/me/albums/contains")
+	if err != nil {
+		return nil, err
+	}
+	return albums, nil
+}
+
+func (s *Spotify) GetNewReleases(params ...Param) (*SimplifiedAlbumChunk, error) {
+	albumChunk := &SimplifiedAlbumChunk{}
+	err := s.Get(albumChunk, "/browse/new-releases")
+	if err != nil {
+		return nil, err
+	}
+	return albumChunk, nil
 }

@@ -11,14 +11,14 @@ type ExternalId struct {
 }
 
 type Follower struct {
-	Href  string `json:"href"`
-	Total int    `json:"total"`
+	Href  string  `json:"href"`
+	Total float64 `json:"total"`
 }
 
 type ImageObject struct {
-	URL    string `json:"url"`
-	Height int    `json:"height"`
-	Width  int    `json:"width"`
+	URL    string  `json:"url"`
+	Height float64 `json:"height"`
+	Width  float64 `json:"width"`
 }
 
 type Restriction struct {

@@ -19,12 +19,12 @@ type FullArtist struct {
 	Followers  Follower      `json:"followers"`
 	Genres     []string      `json:"genres"`
 	Images     []ImageObject `json:"images"`
-	Popularity int           `json:"popularity"`
+	Popularity float64       `json:"popularity"`
 }
 
 func (s *Spotify) GetArtist(id string) (*FullArtist, error) {
 	artist := &FullArtist{}
-	err := s.Get("/artists/"+id, artist)
+	err := s.Get(artist, "/artists/"+id)
 	if err != nil {
 		return nil, err
 	}
@@ -33,22 +33,20 @@ func (s *Spotify) GetArtist(id string) (*FullArtist, error) {
 }
 
 func (s *Spotify) GetArtists(ids []string) ([]*FullArtist, error) {
-	artists := []*FullArtist{}
-	err := s.Get("/artists/?ids="+strings.Join(ids, ","), &artists)
+	var w struct {
+		Artists []*FullArtist `json:"artists"`
+	}
+	err := s.Get(&w, "/artists?ids="+strings.Join(ids, ","))
 	if err != nil {
 		return nil, err
 	}
 
-	return artists, err
+	return w.Artists, err
 }
 
 func (s *Spotify) GetArtistAlbums(id string, params ...Param) (*SimplifiedAlbumChunk, error) {
-	url, err := buildUrl(fmt.Sprintf("/artists/%s/albums", id), params...)
-	if err != nil {
-		return nil, err
-	}
 	albumChunk := &SimplifiedAlbumChunk{}
-	err = s.Get(url, albumChunk)
+	err := s.Get(albumChunk, fmt.Sprintf("/artists/%s/albums", id), params...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,25 +55,22 @@ func (s *Spotify) GetArtistAlbums(id string, params ...Param) (*SimplifiedAlbumC
 }
 
 func (s *Spotify) GetArtistTopTracks(id string, params ...Param) ([]*FullTrack, error) {
-	url, err := buildUrl(fmt.Sprintf("/artists/%s/top-tracks", id), params...)
+	var w struct {
+		Tracks []*FullTrack `json:"tracks"`
+	}
+	err := s.Get(&w, fmt.Sprintf("/artists/%s/top-tracks", id), params...)
 	if err != nil {
 		return nil, err
 	}
 
-	albumChunk := []*FullTrack{}
-	err = s.Get(url, &albumChunk)
-	if err != nil {
-		return nil, err
-	}
-
-	return albumChunk, nil
+	return w.Tracks, nil
 }
 
 func (s *Spotify) GetArtistRelatedArtists(id string) ([]*FullArtist, error) {
 	var w struct {
 		Artists []*FullArtist `json:"artists"`
 	}
-	err := s.Get(fmt.Sprintf("/artists/%s/related-artists", id), &w)
+	err := s.Get(&w, fmt.Sprintf("/artists/%s/related-artists", id))
 	if err != nil {
 		return nil, err
 	}
