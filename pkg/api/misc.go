@@ -40,3 +40,19 @@ type AudioRecording struct {
 	Name         string      `json:"name"`
 	Restrictions Restriction `json:"restrictions"`
 }
+
+func (s *Spotify) GetAvailableGenreSeeds() ([]*string, error) {
+	var w struct {
+		Genres []*string `json:"genres"`
+	}
+	err := s.Get(&w, "/recommendations/available-genre-seeds")
+	return w.Genres, err
+}
+
+func (s *Spotify) GetAvailableMarkets() ([]*string, error) {
+	var w struct {
+		Markets []*string `json:"markets"`
+	}
+	err := s.Get(&w, "/markets")
+	return w.Markets, err
+}

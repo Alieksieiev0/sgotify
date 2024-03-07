@@ -25,6 +25,12 @@ func AdditionalTypes(types string) Param {
 	}
 }
 
+func Locale(lang string) Param {
+	return func(v *url.Values) {
+		v.Add("locale", lang)
+	}
+}
+
 func Limit(num int) Param {
 	return func(v *url.Values) {
 		v.Add("limit", strconv.Itoa(num))

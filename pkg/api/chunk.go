@@ -63,3 +63,8 @@ type SimplifiedChapterChunk struct {
 	Chunk
 	Items []SimplifiedChapterChunk `json:"items"`
 }
+
+type CategoryChunk struct {
+	Chunk
+	Items []Category `json:"items"`
+}
