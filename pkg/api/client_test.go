@@ -18,11 +18,29 @@ func testServer(handler http.HandlerFunc) (*httptest.Server, *Spotify) {
 	return server, spotify
 }
 
+func testBodyOnlyHandler(body []byte) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := writeResponse(w, body)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func testIdsOnlyHandler(ids []string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := validateMultipleIds(ids, r)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 func testSingleIdHandler(id string, body []byte) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqId := path.Base(r.URL.String())
 		if reqId != id {
-			error := fmt.Errorf("Expected Id %s, got %s", id, reqId)
+			error := fmt.Errorf("Expected %s, got %s", id, reqId)
 			panic(error)
 		}
 		w.WriteHeader(http.StatusOK)
@@ -34,15 +52,12 @@ func testSingleIdHandler(id string, body []byte) http.HandlerFunc {
 }
 
 func testMultipleIdsHandler(ids []string, body []byte) http.HandlerFunc {
-	joinedIds := strings.Join(ids, ",")
 	return func(w http.ResponseWriter, r *http.Request) {
-		reqIds := r.URL.Query().Get("ids")
-		if reqIds != joinedIds {
-			error := fmt.Errorf("Expected Id %s, got %s", joinedIds, reqIds)
-			panic(error)
+		err := validateMultipleIds(ids, r)
+		if err != nil {
+			panic(err)
 		}
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write(body)
+		err = writeResponse(w, body)
 		if err != nil {
 			panic(err)
 		}
@@ -57,10 +72,24 @@ func testRelatedObjectHandler(id string, body []byte) http.HandlerFunc {
 			error := fmt.Errorf("Expected Id %s, got %s", id, reqId)
 			panic(error)
 		}
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write(body)
+		err := writeResponse(w, body)
 		if err != nil {
 			panic(err)
 		}
 	}
+}
+
+func validateMultipleIds(ids []string, r *http.Request) error {
+	joinedIds := strings.Join(ids, ",")
+	reqIds := r.URL.Query().Get("ids")
+	if reqIds != joinedIds {
+		return fmt.Errorf("Expected %s, got %s", joinedIds, reqIds)
+	}
+	return nil
+}
+
+func writeResponse(w http.ResponseWriter, body []byte) error {
+	w.WriteHeader(http.StatusOK)
+	_, err := w.Write(body)
+	return err
 }

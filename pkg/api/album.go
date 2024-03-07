@@ -67,13 +67,13 @@ func (s *Spotify) GetAlbumTracks(id string, params ...Param) (*SimplifiedTrackCh
 	return trackChunck, nil
 }
 
-func (s *Spotify) GetUserSavedAlbums(params ...Param) ([]*FullAlbum, error) {
-	albums := []*FullAlbum{}
-	err := s.Get(albums, "/me/albums", params...)
+func (s *Spotify) GetUserSavedAlbums(params ...Param) (*SimplifiedAlbumChunk, error) {
+	albumChunk := &SimplifiedAlbumChunk{}
+	err := s.Get(albumChunk, "/me/albums", params...)
 	if err != nil {
 		return nil, err
 	}
-	return albums, nil
+	return albumChunk, nil
 }
 
 func (s *Spotify) SaveAlbumsForCurrentUser(ids []string) error {
@@ -93,19 +93,21 @@ func (s *Spotify) RemoveUserSavedAlbums(ids []string) error {
 }
 
 func (s *Spotify) CheckUserSavedAlbums(ids []string) ([]*bool, error) {
-	albums := []*bool{}
-	err := s.Get(albums, "/me/albums/contains")
+	containmentInfo := []*bool{}
+	err := s.Get(&containmentInfo, "/me/albums/contains?ids="+strings.Join(ids, ","))
 	if err != nil {
 		return nil, err
 	}
-	return albums, nil
+	return containmentInfo, nil
 }
 
 func (s *Spotify) GetNewReleases(params ...Param) (*SimplifiedAlbumChunk, error) {
-	albumChunk := &SimplifiedAlbumChunk{}
-	err := s.Get(albumChunk, "/browse/new-releases")
+	var w struct {
+		Albums *SimplifiedAlbumChunk `json:"albums"`
+	}
+	err := s.Get(&w, "/browse/new-releases")
 	if err != nil {
 		return nil, err
 	}
-	return albumChunk, nil
+	return w.Albums, nil
 }

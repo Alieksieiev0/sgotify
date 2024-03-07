@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func Test_GetArtist(t *testing.T) {
+func TestGetArtist(t *testing.T) {
 	id := "0TnOYISbd1XYRBk9myaseg"
 	body, err := os.ReadFile("testdata/artist.json")
 	if err != nil {
@@ -27,7 +27,7 @@ func Test_GetArtist(t *testing.T) {
 	testDiffs(t, body, sourceArtist, artist)
 }
 
-func Test_GetArtists(t *testing.T) {
+func TestGetArtists(t *testing.T) {
 	ids := strings.Split(
 		"2CIMQHirSU0MQqyYHq0eOx,57dN52uHvrHOxijzpIgu3E,1vCWHaC5f2uS3yhpwWbIA6",
 		",",
@@ -55,7 +55,7 @@ func Test_GetArtists(t *testing.T) {
 	testDiffs(t, body, &sourceWrapper, &targetWrapper)
 }
 
-func Test_GetArtistAlbums(t *testing.T) {
+func TestGetArtistAlbums(t *testing.T) {
 	id := "0TnOYISbd1XYRBk9myaseg"
 	body, err := os.ReadFile("testdata/artistAlbums.json")
 	if err != nil {
@@ -73,7 +73,7 @@ func Test_GetArtistAlbums(t *testing.T) {
 	testDiffs(t, body, sourceAlbumChunk, albumChunk)
 }
 
-func Test_GetArtisTopTracks(t *testing.T) {
+func TestGetArtisTopTracks(t *testing.T) {
 	id := "0TnOYISbd1XYRBk9myaseg"
 	body, err := os.ReadFile("testdata/artistTopTracks.json")
 	if err != nil {
@@ -97,7 +97,7 @@ func Test_GetArtisTopTracks(t *testing.T) {
 	testDiffs(t, body, &sourceWrapper, &targetWrapper)
 }
 
-func Test_GetArtisRelatedArtists(t *testing.T) {
+func TestGetArtisRelatedArtists(t *testing.T) {
 	id := "0TnOYISbd1XYRBk9myaseg"
 	body, err := os.ReadFile("testdata/artistRelatedArtists.json")
 	if err != nil {
