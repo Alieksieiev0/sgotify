@@ -29,3 +29,14 @@ type AudioResumePoint struct {
 	FullyPlayed      bool `json:"fully_played"`
 	ResumePositionMs int  `json:"resume_position_ms"`
 }
+
+type AudioRecording struct {
+	DurationMs   int         `json:"duration_ms"`
+	Explicit     bool        `json:"explicit"`
+	ExternalURLs ExternalURL `json:"external_urls"`
+	Href         string      `json:"href"`
+	Id           string      `json:"id"`
+	IsPlayable   bool        `json:"is_playable"`
+	Name         string      `json:"name"`
+	Restrictions Restriction `json:"restrictions"`
+}

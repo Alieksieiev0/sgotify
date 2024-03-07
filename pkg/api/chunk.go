@@ -29,9 +29,9 @@ type SimplifiedAlbumChunk struct {
 	Items []SimplifiedAlbum `json:"items"`
 }
 
-type FullPlaylistTrackChunk struct {
+type PlaylistTrackChunk struct {
 	Chunk
-	Items []FullPlaylistTrack `json:"items"`
+	Items []PlaylistTrack `json:"items"`
 }
 
 type SimplifiedPlaylistChunk struct {
@@ -47,6 +47,11 @@ type SimplifiedShowChunk struct {
 type SimplifiedEpisodeChunk struct {
 	Chunk
 	Items []SimplifiedEpisode `json:"items"`
+}
+
+type SavedEpisodeChunk struct {
+	Chunk
+	Items []SavedEpisode `json:"items"`
 }
 
 type SimplifiedAudiobookChunk struct {
