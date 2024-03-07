@@ -1,5 +1,10 @@
 package api
 
+import (
+	"fmt"
+	"strings"
+)
+
 type SimplifiedChapter struct {
 	AudioPreviewUrl      string           `json:"audio_preview_url"`
 	AvailableMarkets     []string         `json:"available_markets"`
@@ -23,7 +28,21 @@ type SimplifiedChapter struct {
 	Restrictions         Restriction      `json:"restrictions"`
 }
 
-type FullChatper struct {
+type FullChapter struct {
 	SimplifiedChapter
 	Audiobook SimplifiedAudiobook `json:"audiobook"`
+}
+
+func (s *Spotify) GetChapter(id string, params ...Param) (*FullChapter, error) {
+	chapter := &FullChapter{}
+	err := s.Get(chapter, fmt.Sprintf("/chapters/%s", id), params...)
+	return chapter, err
+}
+
+func (s *Spotify) GetChapters(ids []string, params ...Param) ([]*FullChapter, error) {
+	var w struct {
+		Chapters []*FullChapter `json:"chapters"`
+	}
+	err := s.Get(&w, "/chapters?ids="+strings.Join(ids, ","), params...)
+	return w.Chapters, err
 }

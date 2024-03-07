@@ -25,11 +25,7 @@ type FullArtist struct {
 func (s *Spotify) GetArtist(id string) (*FullArtist, error) {
 	artist := &FullArtist{}
 	err := s.Get(artist, "/artists/"+id)
-	if err != nil {
-		return nil, err
-	}
-
-	return artist, nil
+	return artist, err
 }
 
 func (s *Spotify) GetArtists(ids []string) ([]*FullArtist, error) {
@@ -37,21 +33,13 @@ func (s *Spotify) GetArtists(ids []string) ([]*FullArtist, error) {
 		Artists []*FullArtist `json:"artists"`
 	}
 	err := s.Get(&w, "/artists?ids="+strings.Join(ids, ","))
-	if err != nil {
-		return nil, err
-	}
-
 	return w.Artists, err
 }
 
 func (s *Spotify) GetArtistAlbums(id string, params ...Param) (*SimplifiedAlbumChunk, error) {
 	albumChunk := &SimplifiedAlbumChunk{}
 	err := s.Get(albumChunk, fmt.Sprintf("/artists/%s/albums", id), params...)
-	if err != nil {
-		return nil, err
-	}
-
-	return albumChunk, nil
+	return albumChunk, err
 }
 
 func (s *Spotify) GetArtistTopTracks(id string, params ...Param) ([]*FullTrack, error) {
@@ -59,11 +47,7 @@ func (s *Spotify) GetArtistTopTracks(id string, params ...Param) ([]*FullTrack, 
 		Tracks []*FullTrack `json:"tracks"`
 	}
 	err := s.Get(&w, fmt.Sprintf("/artists/%s/top-tracks", id), params...)
-	if err != nil {
-		return nil, err
-	}
-
-	return w.Tracks, nil
+	return w.Tracks, err
 }
 
 func (s *Spotify) GetArtistRelatedArtists(id string) ([]*FullArtist, error) {
@@ -71,9 +55,5 @@ func (s *Spotify) GetArtistRelatedArtists(id string) ([]*FullArtist, error) {
 		Artists []*FullArtist `json:"artists"`
 	}
 	err := s.Get(&w, fmt.Sprintf("/artists/%s/related-artists", id))
-	if err != nil {
-		return nil, err
-	}
-
-	return w.Artists, nil
+	return w.Artists, err
 }
