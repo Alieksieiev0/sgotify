@@ -19,15 +19,21 @@ func Market(name string) Param {
 	}
 }
 
+func Fields(names string) Param {
+	return func(v *url.Values) {
+		v.Add("fields", names)
+	}
+}
+
 func AdditionalTypes(types string) Param {
 	return func(v *url.Values) {
 		v.Add("additional_types", types)
 	}
 }
 
-func Locale(lang string) Param {
+func Locale(name string) Param {
 	return func(v *url.Values) {
-		v.Add("locale", lang)
+		v.Add("locale", name)
 	}
 }
 

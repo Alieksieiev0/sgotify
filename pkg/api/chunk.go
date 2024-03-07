@@ -19,6 +19,11 @@ type FullTrackChunk struct {
 	Items []FullTrack `json:"items"`
 }
 
+type SavedTrackChunk struct {
+	Chunk
+	Items []SavedTrack `json:"items"`
+}
+
 type FullArtistChunk struct {
 	Chunk
 	Items []FullArtist `json:"items"`
