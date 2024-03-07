@@ -19,15 +19,40 @@ func Market(name string) Param {
 	}
 }
 
+func AdditionalTypes(types string) Param {
+	return func(v *url.Values) {
+		v.Add("additional_types", types)
+	}
+}
+
 func Limit(num int) Param {
 	return func(v *url.Values) {
 		v.Add("limit", strconv.Itoa(num))
 	}
 }
 
+// replace to work with dates
+func After(num int) Param {
+	return func(v *url.Values) {
+		v.Add("after", strconv.Itoa(num))
+	}
+}
+
+func Before(num int) Param {
+	return func(v *url.Values) {
+		v.Add("before", strconv.Itoa(num))
+	}
+}
+
 func Offset(num int) Param {
 	return func(v *url.Values) {
 		v.Add("offset", strconv.Itoa(num))
+	}
+}
+
+func DeviceId(id string) Param {
+	return func(v *url.Values) {
+		v.Add("device_id", id)
 	}
 }
 

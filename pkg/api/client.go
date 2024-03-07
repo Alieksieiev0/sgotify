@@ -52,7 +52,11 @@ func (s *Spotify) Get(object interface{}, endpoint string, params ...Param) erro
 	return nil
 }
 
-func (s *Spotify) Put(endpoint string, body io.Reader) error {
+func (s *Spotify) Put(endpoint string, body io.Reader, params ...Param) error {
+	endpoint, err := buildUrl(endpoint, params...)
+	if err != nil {
+		return err
+	}
 	req, err := http.NewRequest(http.MethodPut, s.url+endpoint, body)
 	if err != nil {
 		return err
