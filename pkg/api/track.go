@@ -11,11 +11,20 @@ type SimplifiedTrack struct {
 	AvailableMarkets []string           `json:"available_markets"`
 	DiscNumber       int                `json:"disc_number"`
 	LinkedFrom       Linked             `json:"linked_from"`
+	Popularity       int                `json:"popularity"`
 	PreviewURL       string             `json:"preview_url"`
 	TrackNumber      int                `json:"track_number"`
 	Type             string             `json:"type"`
 	URI              string             `json:"uri"`
 	IsLocal          bool               `json:"is_local"`
+}
+
+type Linked struct {
+	ExternalURLs ExternalURL `json:"external_urls"`
+	Href         string      `json:"href"`
+	Id           string      `json:"id"`
+	Type         string      `json:"type"`
+	URI          string      `json:"uri"`
 }
 
 type FullTrack struct {
@@ -27,6 +36,20 @@ type FullTrack struct {
 type SavedTrack struct {
 	AddedAt string    `json:"added_at"`
 	Track   FullTrack `json:"track"`
+}
+
+type RecommendationSeed struct {
+	AfterFilteringSize int    `json:"after_filtering_size"`
+	AfterRelinkingSize int    `json:"after_relinking_size"`
+	Href               string `json:"href"`
+	Id                 string `json:"id"`
+	InitialPoolSize    int    `json:"initial_pool_size"`
+	Type               string `json:"type"`
+}
+
+type Recommendation struct {
+	Seeds  []RecommendationSeed `json:"seeds"`
+	Tracks []FullTrack          `json:"tracks"`
 }
 
 type AudioFeature struct {
@@ -123,14 +146,6 @@ type BaseAudioAnalysis struct {
 	TimeSignatureConfidence float32 `json:"time_signature_confidence"`
 }
 
-type Linked struct {
-	ExternalURLs ExternalURL `json:"external_urls"`
-	Href         string      `json:"href"`
-	Id           string      `json:"id"`
-	Type         string      `json:"type"`
-	URI          string      `json:"uri"`
-}
-
 func (s *Spotify) GetTrack(id string, params ...Param) (*FullTrack, error) {
 	track := &FullTrack{}
 	err := s.Get(track, fmt.Sprintf("/tracks/%s", id), params...)
@@ -181,4 +196,10 @@ func (s *Spotify) GetTrackAudioAnalysis(id string) (*AudioAnalysis, error) {
 	audioAnalysis := &AudioAnalysis{}
 	err := s.Get(audioAnalysis, "/audio-analysis/"+id)
 	return audioAnalysis, err
+}
+
+func (s *Spotify) GetRecommendations(params ...Param) (*Recommendation, error) {
+	recommendation := &Recommendation{}
+	err := s.Get(recommendation, "/recommendations", params...)
+	return recommendation, err
 }
