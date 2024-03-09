@@ -73,3 +73,8 @@ type CategoryChunk struct {
 	Chunk
 	Items []Category `json:"items"`
 }
+
+type UserItemChunk struct {
+	Chunk
+	Items interface{}
+}
