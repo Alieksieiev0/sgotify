@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 )
@@ -58,11 +57,11 @@ func (s *Spotify) GetUserSavedShows(params ...Param) (*SimplifiedShowChunk, erro
 }
 
 func (s *Spotify) SaveShowsForCurrentUser(ids []string) error {
-	return s.Put("/me/shows?ids="+strings.Join(ids, ","), bytes.NewBuffer([]byte{}))
+	return s.Put(nil, "/me/shows?ids="+strings.Join(ids, ","), []byte{})
 }
 
 func (s *Spotify) RemoveUserSavedShows(ids []string) error {
-	return s.Delete("/me/shows?ids="+strings.Join(ids, ","), bytes.NewBuffer([]byte{}))
+	return s.Delete(nil, "/me/shows?ids="+strings.Join(ids, ","), []byte{})
 }
 
 func (s *Spotify) CheckUserSavedShows(ids []string) ([]*bool, error) {

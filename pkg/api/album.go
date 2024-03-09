@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 )
@@ -65,11 +64,11 @@ func (s *Spotify) GetUserSavedAlbums(params ...Param) (*SimplifiedAlbumChunk, er
 }
 
 func (s *Spotify) SaveAlbumsForCurrentUser(ids []string) error {
-	return s.Put("/me/albums?ids="+strings.Join(ids, ","), bytes.NewBuffer([]byte{}))
+	return s.Put(nil, "/me/albums?ids="+strings.Join(ids, ","), []byte{})
 }
 
 func (s *Spotify) RemoveUserSavedAlbums(ids []string) error {
-	return s.Delete("/me/albums?ids="+strings.Join(ids, ","), bytes.NewBuffer([]byte{}))
+	return s.Delete(nil, "/me/albums?ids="+strings.Join(ids, ","), []byte{})
 }
 
 func (s *Spotify) CheckUserSavedAlbums(ids []string) ([]*bool, error) {

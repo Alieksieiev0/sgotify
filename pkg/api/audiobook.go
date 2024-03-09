@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 )
@@ -71,11 +70,11 @@ func (s *Spotify) GetUserSavedAudiobooks(params ...Param) (*SimplifiedAudiobookC
 }
 
 func (s *Spotify) SaveAudiobooksForCurrentUser(ids []string) error {
-	return s.Put("/me/audiobooks?ids="+strings.Join(ids, ","), bytes.NewBuffer([]byte{}))
+	return s.Put(nil, "/me/audiobooks?ids="+strings.Join(ids, ","), []byte{})
 }
 
 func (s *Spotify) RemoveUserSavedAudiobooks(ids []string) error {
-	return s.Delete("/me/audiobooks?ids="+strings.Join(ids, ","), bytes.NewBuffer([]byte{}))
+	return s.Delete(nil, "/me/audiobooks?ids="+strings.Join(ids, ","), []byte{})
 }
 
 func (s *Spotify) CheckUserSavedAudiobooks(ids []string) ([]*bool, error) {

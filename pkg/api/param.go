@@ -68,6 +68,18 @@ func DeviceId(id string) Param {
 	}
 }
 
+func URIs(ids string) Param {
+	return func(v *url.Values) {
+		v.Add("uris", ids)
+	}
+}
+
+func Position(num int) Param {
+	return func(v *url.Values) {
+		v.Add("position", strconv.Itoa(num))
+	}
+}
+
 func buildUrl(path string, params ...Param) (string, error) {
 	parsedUrl, err := url.Parse(path)
 	if err != nil {

@@ -41,17 +41,17 @@ type AudioRecording struct {
 	Restrictions Restriction `json:"restrictions"`
 }
 
-func (s *Spotify) GetAvailableGenreSeeds() ([]*string, error) {
+func (s *Spotify) GetAvailableGenreSeeds() ([]string, error) {
 	var w struct {
-		Genres []*string `json:"genres"`
+		Genres []string `json:"genres"`
 	}
 	err := s.Get(&w, "/recommendations/available-genre-seeds")
 	return w.Genres, err
 }
 
-func (s *Spotify) GetAvailableMarkets() ([]*string, error) {
+func (s *Spotify) GetAvailableMarkets() ([]string, error) {
 	var w struct {
-		Markets []*string `json:"markets"`
+		Markets []string `json:"markets"`
 	}
 	err := s.Get(&w, "/markets")
 	return w.Markets, err

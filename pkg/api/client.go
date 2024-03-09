@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -20,12 +21,105 @@ type Spotify struct {
 	url    string
 }
 
-func (s *Spotify) Get(object interface{}, endpoint string, params ...Param) error {
-	endpoint, err := buildUrl(endpoint, params...)
+type spotifyRequestData struct {
+	responseData interface{}
+	method       string
+	endpoint     string
+	params       []Param
+	body         []byte
+}
+
+func (s *Spotify) Get(responseData interface{}, endpoint string, params ...Param) error {
+	requestData := spotifyRequestData{
+		responseData,
+		http.MethodGet,
+		endpoint,
+		params,
+		[]byte{},
+	}
+
+	return s.doRequest(requestData)
+}
+
+func (s *Spotify) Put(
+	responseData interface{},
+	endpoint string,
+	body []byte,
+	params ...Param,
+) error {
+	requestData := spotifyRequestData{
+		responseData,
+		http.MethodPut,
+		endpoint,
+		params,
+		body,
+	}
+
+	return s.doRequest(requestData)
+}
+
+func (s *Spotify) Post(
+	responseData interface{},
+	endpoint string,
+	body []byte,
+	params ...Param,
+) error {
+	requestData := spotifyRequestData{
+		responseData,
+		http.MethodPost,
+		endpoint,
+		params,
+		body,
+	}
+
+	return s.doRequest(requestData)
+}
+
+func (s *Spotify) Delete(
+	responseData interface{},
+	endpoint string,
+	body []byte,
+	params ...Param,
+) error {
+	requestData := spotifyRequestData{
+		responseData,
+		http.MethodDelete,
+		endpoint,
+		params,
+		body,
+	}
+
+	return s.doRequest(requestData)
+}
+
+func (s *Spotify) doRequest(data spotifyRequestData) error {
+	req, err := s.createRequest(data)
 	if err != nil {
 		return err
 	}
-	res, err := s.client.Get(s.url + endpoint)
+
+	return s.sendRequest(data.responseData, req)
+}
+
+func (s *Spotify) createRequest(data spotifyRequestData) (*http.Request, error) {
+	endpoint, err := buildUrl(data.endpoint, data.params...)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(data.method, s.url+endpoint, bytes.NewBuffer(data.body))
+	if err != nil {
+		fmt.Println(1)
+		return nil, err
+	}
+	if data.method == http.MethodPut || data.method == http.MethodDelete {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	return req, err
+}
+
+func (s *Spotify) sendRequest(resData interface{}, req *http.Request) error {
+	res, err := s.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -36,65 +130,23 @@ func (s *Spotify) Get(object interface{}, endpoint string, params ...Param) erro
 	}
 
 	if res.StatusCode != http.StatusOK {
-		resErr := Error{}
-		err = json.Unmarshal(body, &resErr)
-		if err != nil {
-			return err
-		}
-		return fmt.Errorf("spotify request error: %v", resErr)
+		return s.handleError(body)
 	}
-
-	err = json.Unmarshal(body, object)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *Spotify) Put(endpoint string, body io.Reader, params ...Param) error {
-	endpoint, err := buildUrl(endpoint, params...)
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequest(http.MethodPut, s.url+endpoint, body)
-	if err != nil {
-		return err
-	}
-
-	return doRequest(s, req)
-}
-
-func (s *Spotify) Delete(endpoint string, body io.Reader) error {
-	req, err := http.NewRequest(http.MethodDelete, s.url+endpoint, body)
-	if err != nil {
-		return err
-	}
-
-	return doRequest(s, req)
-}
-
-func doRequest(s *Spotify, req *http.Request) error {
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := s.client.Do(req)
-	if err != nil {
-		return err
-	}
-	if res.StatusCode == http.StatusOK {
+	if resData == nil {
 		return nil
 	}
+	return json.Unmarshal(body, resData)
+}
 
-	resBody, err := io.ReadAll(res.Body)
+func (s *Spotify) handleError(body []byte) error {
+	var w struct {
+		Error Error `json:"error"`
+	}
+	err := json.Unmarshal(body, &w)
 	if err != nil {
 		return err
 	}
-	resErr := Error{}
-	err = json.Unmarshal(resBody, &resErr)
-	if err != nil {
-		return err
-	}
-	return fmt.Errorf("spotify request error: %v", resErr)
+	return fmt.Errorf("spotify request error: %v", w.Error)
 }
 
 func NewSpotifyClient(ctx context.Context, token *oauth2.Token) Spotify {

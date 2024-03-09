@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bytes"
 	"encoding/json"
 	"strconv"
 )
@@ -93,7 +92,7 @@ func (s *Spotify) TransferPlayback(deviceIds []string, play bool) error {
 	if err != nil {
 		return err
 	}
-	return s.Put("/me/player", bytes.NewBuffer(body))
+	return s.Put(nil, "/me/player", body)
 }
 
 func (s *Spotify) GetAvailableDevices() ([]*Device, error) {
@@ -132,43 +131,46 @@ func (s *Spotify) StartResumePlayback(
 	if err != nil {
 		return err
 	}
-	return s.Put("/me/player/play", bytes.NewBuffer(body), params...)
+	return s.Put(nil, "/me/player/play", body, params...)
 }
 
 func (s *Spotify) PausePlayback(params ...Param) error {
-	return s.Put("/me/player/pause", bytes.NewBuffer([]byte{}), params...)
+	return s.Put(nil, "/me/player/pause", []byte{}, params...)
 }
 
 func (s *Spotify) SkipToNext(params ...Param) error {
-	return s.Put("/me/player/next", bytes.NewBuffer([]byte{}), params...)
+	return s.Put(nil, "/me/player/next", []byte{}, params...)
 }
 
 func (s *Spotify) SkipToPrevious(params ...Param) error {
-	return s.Put("/me/player/previous", bytes.NewBuffer([]byte{}), params...)
+	return s.Put(nil, "/me/player/previous", []byte{}, params...)
 }
 
 func (s *Spotify) SeekToPosition(positionMs int, params ...Param) error {
 	return s.Put(
+		nil,
 		"/me/player/seek?position_ms="+strconv.Itoa(positionMs),
-		bytes.NewBuffer([]byte{}),
+		[]byte{},
 		params...)
 }
 
 func (s *Spotify) SetRepeatMode(state string, params ...Param) error {
-	return s.Put("/me/player/repeat?state="+state, bytes.NewBuffer([]byte{}), params...)
+	return s.Put(nil, "/me/player/repeat?state="+state, []byte{}, params...)
 }
 
 func (s *Spotify) SetPlaybackVolume(volumePercent int, params ...Param) error {
 	return s.Put(
+		nil,
 		"/me/player/volume?volume_percent="+strconv.Itoa(volumePercent),
-		bytes.NewBuffer([]byte{}),
+		[]byte{},
 		params...)
 }
 
 func (s *Spotify) TogglePlaybackShuffle(state bool, params ...Param) error {
 	return s.Put(
+		nil,
 		"/me/player/shuffle?boolean="+strconv.FormatBool(state),
-		bytes.NewBuffer([]byte{}),
+		[]byte{},
 		params...)
 }
 
@@ -185,5 +187,5 @@ func (s *Spotify) GetUserQueue() (*UserQueue, error) {
 }
 
 func (s *Spotify) AddItemToPlaybackQueue(URI string, params ...Param) error {
-	return s.Put("/me/player/queue?uri="+URI, bytes.NewBuffer([]byte{}), params...)
+	return s.Put(nil, "/me/player/queue?uri="+URI, []byte{}, params...)
 }
