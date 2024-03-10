@@ -40,15 +40,12 @@ func TestGetAlbums(t *testing.T) {
 		Albums []*FullAlbum
 	}
 
-	targetAlbums := &w{
-		Albums: albums,
-	}
+	targetAlbums := &w{albums}
 	sourceAlbums := &w{}
-	testDiffs(t, body, &sourceAlbums, &targetAlbums)
+	testDiffs(t, body, sourceAlbums, targetAlbums)
 }
 
 func TestGetAlbumTracks(t *testing.T) {
-	id := "4aawyAB9vmqN3uQ7FjRGTy"
 	body, err := os.ReadFile("testdata/albumTracks.json")
 	if err != nil {
 		t.Fatal(err)
@@ -57,7 +54,7 @@ func TestGetAlbumTracks(t *testing.T) {
 	server, spotify := testServer(testRelatedObjectHandler(body))
 	defer server.Close()
 
-	trackChunk, err := spotify.GetAlbumTracks(id)
+	trackChunk, err := spotify.GetAlbumTracks(testId)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,9 +133,7 @@ func TestGetNewReleases(t *testing.T) {
 		Albums *SimplifiedAlbumChunk
 	}
 
-	targetAlbumChunk := &w{
-		Albums: albumChunk,
-	}
+	targetAlbumChunk := &w{albumChunk}
 	sourceAlbumChunk := &w{}
-	testDiffs(t, body, &sourceAlbumChunk, &targetAlbumChunk)
+	testDiffs(t, body, sourceAlbumChunk, targetAlbumChunk)
 }

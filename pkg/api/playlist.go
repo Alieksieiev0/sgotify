@@ -212,3 +212,7 @@ func (s *Spotify) GetPlaylistCoverImage(id string) ([]*Image, error) {
 	err := s.Get(&image, fmt.Sprintf("/playlists/%s/images", id))
 	return image, err
 }
+
+func (s *Spotify) AddCustomPlaylistCoverImage(id, data string) error {
+	return s.PutImage(nil, fmt.Sprintf("/playlists/%s/images", id), data)
+}

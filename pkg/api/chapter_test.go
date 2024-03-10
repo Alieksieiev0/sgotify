@@ -40,9 +40,7 @@ func TestGetChapters(t *testing.T) {
 		Chapters []*FullChapter
 	}
 
-	targetChapters := &w{
-		Chapters: chapters,
-	}
+	targetChapters := &w{chapters}
 	sourceChapters := &w{}
-	testDiffs(t, body, &sourceChapters, &targetChapters)
+	testDiffs(t, body, sourceChapters, targetChapters)
 }

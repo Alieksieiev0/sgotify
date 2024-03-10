@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"golang.org/x/oauth2"
 )
@@ -22,71 +23,93 @@ type Spotify struct {
 }
 
 type spotifyRequestData struct {
-	responseData interface{}
-	method       string
-	endpoint     string
-	params       []Param
-	body         []byte
+	response interface{}
+	method   string
+	endpoint string
+	params   []Param
+	headers  map[string]string
+	body     io.Reader
 }
 
-func (s *Spotify) Get(responseData interface{}, endpoint string, params ...Param) error {
+func (s *Spotify) Get(response interface{}, endpoint string, params ...Param) error {
 	requestData := spotifyRequestData{
-		responseData,
+		response,
 		http.MethodGet,
 		endpoint,
 		params,
-		[]byte{},
+		map[string]string{},
+		bytes.NewBuffer([]byte{}),
 	}
 
 	return s.doRequest(requestData)
 }
 
 func (s *Spotify) Put(
-	responseData interface{},
+	response interface{},
 	endpoint string,
 	body []byte,
 	params ...Param,
 ) error {
 	requestData := spotifyRequestData{
-		responseData,
+		response,
 		http.MethodPut,
 		endpoint,
 		params,
-		body,
+		map[string]string{"Content-Type": "application/json"},
+		bytes.NewBuffer(body),
+	}
+
+	return s.doRequest(requestData)
+}
+
+func (s *Spotify) PutImage(
+	response interface{},
+	endpoint, body string,
+	params ...Param,
+) error {
+	requestData := spotifyRequestData{
+		response,
+		http.MethodPut,
+		endpoint,
+		params,
+		map[string]string{"Content-Type": "image/jpeg"},
+		strings.NewReader(body),
 	}
 
 	return s.doRequest(requestData)
 }
 
 func (s *Spotify) Post(
-	responseData interface{},
+	response interface{},
 	endpoint string,
 	body []byte,
 	params ...Param,
 ) error {
 	requestData := spotifyRequestData{
-		responseData,
+		response,
 		http.MethodPost,
 		endpoint,
 		params,
-		body,
+		map[string]string{"Content-Type": "application/json"},
+		bytes.NewBuffer(body),
 	}
 
 	return s.doRequest(requestData)
 }
 
 func (s *Spotify) Delete(
-	responseData interface{},
+	response interface{},
 	endpoint string,
 	body []byte,
 	params ...Param,
 ) error {
 	requestData := spotifyRequestData{
-		responseData,
+		response,
 		http.MethodDelete,
 		endpoint,
 		params,
-		body,
+		map[string]string{},
+		bytes.NewBuffer(body),
 	}
 
 	return s.doRequest(requestData)
@@ -98,7 +121,7 @@ func (s *Spotify) doRequest(data spotifyRequestData) error {
 		return err
 	}
 
-	return s.sendRequest(data.responseData, req)
+	return s.sendRequest(data.response, req)
 }
 
 func (s *Spotify) createRequest(data spotifyRequestData) (*http.Request, error) {
@@ -107,13 +130,13 @@ func (s *Spotify) createRequest(data spotifyRequestData) (*http.Request, error) 
 		return nil, err
 	}
 
-	req, err := http.NewRequest(data.method, s.url+endpoint, bytes.NewBuffer(data.body))
+	req, err := http.NewRequest(data.method, s.url+endpoint, data.body)
 	if err != nil {
 		fmt.Println(1)
 		return nil, err
 	}
-	if data.method == http.MethodPut || data.method == http.MethodDelete {
-		req.Header.Set("Content-Type", "application/json")
+	for k, v := range data.headers {
+		req.Header.Set(k, v)
 	}
 	return req, err
 }

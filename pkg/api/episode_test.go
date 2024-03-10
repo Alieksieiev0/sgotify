@@ -40,11 +40,9 @@ func TestGetEpisodes(t *testing.T) {
 		Episodes []*FullEpisode
 	}
 
-	targetEpisodes := &w{
-		Episodes: episodes,
-	}
+	targetEpisodes := &w{episodes}
 	sourceEpisodes := &w{}
-	testDiffs(t, body, &sourceEpisodes, &targetEpisodes)
+	testDiffs(t, body, sourceEpisodes, targetEpisodes)
 }
 
 func TestGetUserSavedEpisodes(t *testing.T) {
@@ -69,7 +67,7 @@ func TestSaveEpisodesForCurrentUser(t *testing.T) {
 	server, spotify := testServer(testIdsOnlyHandler())
 	defer server.Close()
 
-	err := spotify.SaveAlbumsForCurrentUser(getTestIds())
+	err := spotify.SaveEpisodesForCurrentUser(getTestIds())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +77,7 @@ func TestRemoveUserSavedEpisodes(t *testing.T) {
 	server, spotify := testServer(testIdsOnlyHandler())
 	defer server.Close()
 
-	err := spotify.RemoveUserSavedAlbums(getTestIds())
+	err := spotify.RemoveUserSavedEpisodes(getTestIds())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +92,7 @@ func TestCheckUserSavedEpisodes(t *testing.T) {
 	server, spotify := testServer(testMultipleIdsHandler(body))
 	defer server.Close()
 
-	containmentInfo, err := spotify.CheckUserSavedAlbums(getTestIds())
+	containmentInfo, err := spotify.CheckUserSavedEpisodes(getTestIds())
 	if err != nil {
 		t.Fatal(err)
 	}

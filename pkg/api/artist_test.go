@@ -42,11 +42,9 @@ func TestGetArtists(t *testing.T) {
 		Artists []*FullArtist
 	}
 
-	targetArtists := &w{
-		Artists: artists,
-	}
+	targetArtists := &w{artists}
 	sourceArtists := &w{}
-	testDiffs(t, body, &sourceArtists, &targetArtists)
+	testDiffs(t, body, sourceArtists, targetArtists)
 }
 
 func TestGetArtistAlbums(t *testing.T) {
@@ -86,7 +84,7 @@ func TestGetArtisTopTracks(t *testing.T) {
 
 	targetTracks := &w{topTracks}
 	sourceTracks := &w{}
-	testDiffs(t, body, &sourceTracks, &targetTracks)
+	testDiffs(t, body, sourceTracks, targetTracks)
 }
 
 func TestGetArtisRelatedArtists(t *testing.T) {
@@ -108,7 +106,6 @@ func TestGetArtisRelatedArtists(t *testing.T) {
 
 	targetWrapper := &w{relatedArtists}
 	sourceWrapper := &w{}
-
 	testDiffs(t, body, sourceWrapper, targetWrapper)
 }
 

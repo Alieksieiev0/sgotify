@@ -117,9 +117,9 @@ type TrackAnalysis struct {
 }
 
 type Interval struct {
-	Start      int `json:"start"`
-	Duration   int `json:"duration"`
-	Confidence int `json:"confidence"`
+	Start      float32 `json:"start"`
+	Duration   float32 `json:"duration"`
+	Confidence float32 `json:"confidence"`
 }
 
 type Sections struct {
@@ -184,9 +184,11 @@ func (s *Spotify) CheckUserSavedTracks(ids []string) ([]bool, error) {
 }
 
 func (s *Spotify) GetTracksAudioFeatures(ids []string) ([]*AudioFeature, error) {
-	audioFeatures := []*AudioFeature{}
-	err := s.Get(&audioFeatures, fmt.Sprintf("/audio-features?=%s", strings.Join(ids, ",")))
-	return audioFeatures, err
+	var w struct {
+		AudioFeatures []*AudioFeature `json:"audio_features"`
+	}
+	err := s.Get(&w, fmt.Sprintf("/audio-features?ids=%s", strings.Join(ids, ",")))
+	return w.AudioFeatures, err
 }
 
 func (s *Spotify) GetTrackAudioFeatures(id string) (*AudioFeature, error) {

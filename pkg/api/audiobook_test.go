@@ -40,11 +40,9 @@ func TestGetAudiobooks(t *testing.T) {
 		Audiobooks []*FullAudiobook
 	}
 
-	targetAudiobooks := &w{
-		Audiobooks: audiobooks,
-	}
+	targetAudiobooks := &w{audiobooks}
 	sourceAudiobooks := &w{}
-	testDiffs(t, body, &sourceAudiobooks, &targetAudiobooks)
+	testDiffs(t, body, sourceAudiobooks, targetAudiobooks)
 }
 
 func TestGetAudiobookChapters(t *testing.T) {

@@ -40,9 +40,7 @@ func TestGetBrowseCategories(t *testing.T) {
 		Categories *CategoryChunk
 	}
 
-	targetCategories := &w{
-		Categories: categories,
-	}
+	targetCategories := &w{categories}
 	sourceCategories := &w{}
-	testDiffs(t, body, &sourceCategories, &targetCategories)
+	testDiffs(t, body, sourceCategories, targetCategories)
 }

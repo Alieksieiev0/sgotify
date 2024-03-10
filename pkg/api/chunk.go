@@ -76,5 +76,5 @@ type SavedTrackChunk struct {
 
 type UserItemChunk struct {
 	Chunk
-	Items Item
+	Items []Item
 }

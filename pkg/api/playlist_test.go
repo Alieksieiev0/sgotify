@@ -23,7 +23,7 @@ func TestGetPlaylist(t *testing.T) {
 	testDiffs(t, body, sourcePlaylist, playlist)
 }
 
-func ChangePlaylistDetails(t *testing.T) {
+func TestChangePlaylistDetails(t *testing.T) {
 	server, spotify := testServer(testSingleIdHandler([]byte{}))
 	defer server.Close()
 
@@ -187,7 +187,7 @@ func TestGetCategoryPlaylists(t *testing.T) {
 	testDiffs(t, body, sourcePlaylist, playlist)
 }
 
-func TestGetPLaylistCoverImage(t *testing.T) {
+func TestGetPlaylistCoverImage(t *testing.T) {
 	body, err := os.ReadFile("testdata/coverImage.json")
 	if err != nil {
 		t.Fatal(err)
@@ -203,4 +203,14 @@ func TestGetPLaylistCoverImage(t *testing.T) {
 
 	sourceImage := []*Image{}
 	testDiffs(t, body, &sourceImage, &image)
+}
+
+func TestAddCustomPlaylistCoverImage(t *testing.T) {
+	server, spotify := testServer(testRelatedObjectHandler([]byte{}))
+	defer server.Close()
+
+	err := spotify.AddCustomPlaylistCoverImage(testId, "test")
+	if err != nil {
+		t.Fatal(err)
+	}
 }
