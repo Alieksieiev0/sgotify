@@ -16,15 +16,15 @@ type SimplifiedArtist struct {
 
 type FullArtist struct {
 	SimplifiedArtist
-	Followers  Follower      `json:"followers"`
-	Genres     []string      `json:"genres"`
-	Images     []ImageObject `json:"images"`
-	Popularity float64       `json:"popularity"`
+	Followers  Follower `json:"followers"`
+	Genres     []string `json:"genres"`
+	Images     []Image  `json:"images"`
+	Popularity float64  `json:"popularity"`
 }
 
 func (s *Spotify) GetArtist(id string) (*FullArtist, error) {
 	artist := &FullArtist{}
-	err := s.Get(artist, "/artists/"+id)
+	err := s.Get(artist, fmt.Sprintf("/artists/%s", id))
 	return artist, err
 }
 
@@ -32,7 +32,7 @@ func (s *Spotify) GetArtists(ids []string) ([]*FullArtist, error) {
 	var w struct {
 		Artists []*FullArtist `json:"artists"`
 	}
-	err := s.Get(&w, "/artists?ids="+strings.Join(ids, ","))
+	err := s.Get(&w, fmt.Sprintf("/artists?ids=%s", strings.Join(ids, ",")))
 	return w.Artists, err
 }
 

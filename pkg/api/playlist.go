@@ -16,10 +16,10 @@ type PlaylistOwner struct {
 }
 
 type PlaylistTrack struct {
-	AddedAt string      `json:"added_at"`
-	AddedBy string      `json:"added_by"`
-	IsLocal bool        `json:"is_local"`
-	Track   interface{} `json:"track"`
+	AddedAt string `json:"added_at"`
+	AddedBy string `json:"added_by"`
+	IsLocal bool   `json:"is_local"`
+	Track   Item   `json:"track"`
 }
 
 type SimplifiedPlaylist struct {
@@ -28,7 +28,7 @@ type SimplifiedPlaylist struct {
 	ExternalURLs  ExternalURL        `json:"external_urls"`
 	Href          string             `json:"href"`
 	Id            string             `json:"id"`
-	Images        []ImageObject      `json:"images"`
+	Images        []Image            `json:"images"`
 	Name          string             `json:"name"`
 	Owner         PlaylistOwner      `json:"owner"`
 	Public        bool               `json:"public"`
@@ -86,7 +86,7 @@ func (s *Spotify) ChangePlaylistDetails(
 
 func (s *Spotify) GetPlaylistItems(id string, params ...Param) (*PlaylistTrackChunk, error) {
 	trackChunck := &PlaylistTrackChunk{}
-	err := s.Get(trackChunck, "/playlists/"+id+"/tracks", params...)
+	err := s.Get(trackChunck, fmt.Sprintf("/playlists/%s/tracks", id), params...)
 	return trackChunck, err
 }
 
@@ -114,7 +114,7 @@ func (s *Spotify) UpdatePlaylistItems(
 	if err != nil {
 		return nil, err
 	}
-	err = s.Put(snapshot, "/playlists/"+id+"/tracks", body, params...)
+	err = s.Put(snapshot, fmt.Sprintf("/playlists/%s/tracks", id), body, params...)
 	return snapshot, err
 }
 
@@ -136,7 +136,7 @@ func (s *Spotify) AddItemsToPlaylist(
 	if err != nil {
 		return nil, err
 	}
-	err = s.Put(snapshot, "/playlists/"+id+"/tracks", body, params...)
+	err = s.Put(snapshot, fmt.Sprintf("/playlists/%s/tracks", id), body, params...)
 	return snapshot, err
 }
 
@@ -157,7 +157,7 @@ func (s *Spotify) RemovePlaylistItem(
 	if err != nil {
 		return nil, err
 	}
-	err = s.Delete(snapshot, "/playlists/"+id+"/tracks", body)
+	err = s.Delete(snapshot, fmt.Sprintf("/playlists/%s/tracks", id), body)
 	return snapshot, err
 }
 
@@ -172,7 +172,7 @@ func (s *Spotify) GetUserPlaylists(
 	params ...Param,
 ) (*SimplifiedPlaylistChunk, error) {
 	playlistChunk := &SimplifiedPlaylistChunk{}
-	err := s.Get(playlistChunk, "/users/"+userId+"/playlists")
+	err := s.Get(playlistChunk, fmt.Sprintf("/users/%s/playlists", userId))
 	return playlistChunk, err
 }
 
@@ -199,7 +199,7 @@ func (s *Spotify) CreatePlaylist(
 	if err != nil {
 		return nil, err
 	}
-	err = s.Post(playlist, "/users/"+userId+"/playlists", body)
+	err = s.Post(playlist, fmt.Sprintf("/users/%s/playlists", userId), body)
 	return playlist, err
 }
 
@@ -214,12 +214,15 @@ func (s *Spotify) GetCategoryPlaylists(
 	params ...Param,
 ) (*DescribedPlaylist, error) {
 	describedPlaylist := &DescribedPlaylist{}
-	err := s.Get(describedPlaylist, "/browse/categories/"+categoryId+"/playlists", params...)
+	err := s.Get(
+		describedPlaylist,
+		fmt.Sprintf("/browse/categories/%s/playlists", categoryId),
+		params...)
 	return describedPlaylist, err
 }
 
-func (s *Spotify) GetPlaylistCoverImage(id string) ([]*ImageObject, error) {
-	imageObjects := []*ImageObject{}
-	err := s.Get(&imageObjects, "/playlists/"+id+"/images")
+func (s *Spotify) GetPlaylistCoverImage(id string) ([]*Image, error) {
+	imageObjects := []*Image{}
+	err := s.Get(&imageObjects, fmt.Sprintf("/playlists/%s/images", id))
 	return imageObjects, err
 }

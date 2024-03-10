@@ -2,42 +2,37 @@ package api
 
 import (
 	"os"
-	"strings"
 	"testing"
 )
 
 func TestGetAlbum(t *testing.T) {
-	id := "4aawyAB9vmqN3uQ7FjRGTy"
 	body, err := os.ReadFile("testdata/album.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	server, spotify := testServer(testSingleIdHandler(id, body))
+	server, spotify := testServer(testSingleIdHandler(body))
 	defer server.Close()
 
-	album, err := spotify.GetAlbum(id)
+	album, err := spotify.GetAlbum(testId)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	sourceAlbum := &FullAlbum{}
 	testDiffs(t, body, sourceAlbum, album)
 }
 
 func TestGetAlbums(t *testing.T) {
-	ids := strings.Split(
-		"382ObEPsp2rxGrnsizN5TX,1A2GTWGtFfWp7KSQTwWOyo,2noRn2Aes5aoNVsU6iWThc",
-		",",
-	)
 	body, err := os.ReadFile("testdata/albums.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	server, spotify := testServer(testMultipleIdsHandler(ids, body))
+	server, spotify := testServer(testMultipleIdsHandler(body))
 	defer server.Close()
 
-	albums, err := spotify.GetAlbums(ids)
+	albums, err := spotify.GetAlbums(getTestIds())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,11 +40,11 @@ func TestGetAlbums(t *testing.T) {
 		Albums []*FullAlbum
 	}
 
-	targetWrapper := &w{
+	targetAlbums := &w{
 		Albums: albums,
 	}
-	sourceWrapper := &w{}
-	testDiffs(t, body, &sourceWrapper, &targetWrapper)
+	sourceAlbums := &w{}
+	testDiffs(t, body, &sourceAlbums, &targetAlbums)
 }
 
 func TestGetAlbumTracks(t *testing.T) {
@@ -59,7 +54,7 @@ func TestGetAlbumTracks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	server, spotify := testServer(testRelatedObjectHandler(id, body))
+	server, spotify := testServer(testRelatedObjectHandler(body))
 	defer server.Close()
 
 	trackChunk, err := spotify.GetAlbumTracks(id)
@@ -89,51 +84,39 @@ func TestGetUserSavedAlbums(t *testing.T) {
 }
 
 func TestSaveAlbumsForCurrentUser(t *testing.T) {
-	ids := strings.Split(
-		"382ObEPsp2rxGrnsizN5TX,1A2GTWGtFfWp7KSQTwWOyo,2noRn2Aes5aoNVsU6iWThc",
-		",",
-	)
-	server, spotify := testServer(testIdsOnlyHandler(ids))
+	server, spotify := testServer(testIdsOnlyHandler())
 	defer server.Close()
 
-	err := spotify.SaveAlbumsForCurrentUser(ids)
+	err := spotify.SaveAlbumsForCurrentUser(getTestIds())
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestRemoveUserSavedAlbums(t *testing.T) {
-	ids := strings.Split(
-		"382ObEPsp2rxGrnsizN5TX,1A2GTWGtFfWp7KSQTwWOyo,2noRn2Aes5aoNVsU6iWThc",
-		",",
-	)
-	server, spotify := testServer(testIdsOnlyHandler(ids))
+	server, spotify := testServer(testIdsOnlyHandler())
 	defer server.Close()
 
-	err := spotify.RemoveUserSavedAlbums(ids)
+	err := spotify.RemoveUserSavedAlbums(getTestIds())
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCheckUserSavedAlbums(t *testing.T) {
-	ids := strings.Split(
-		"382ObEPsp2rxGrnsizN5TX,1A2GTWGtFfWp7KSQTwWOyo,2noRn2Aes5aoNVsU6iWThc",
-		",",
-	)
 	body, err := os.ReadFile("testdata/checkedUserSavedAlbums.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	server, spotify := testServer(testMultipleIdsHandler(ids, body))
+	server, spotify := testServer(testMultipleIdsHandler(body))
 	defer server.Close()
 
-	containmentInfo, err := spotify.CheckUserSavedAlbums(ids)
+	containmentInfo, err := spotify.CheckUserSavedAlbums(getTestIds())
 	if err != nil {
 		t.Fatal(err)
 	}
-	testDiffs(t, body, &[]*bool{}, &containmentInfo)
+	testDiffs(t, body, &[]bool{}, &containmentInfo)
 }
 
 func TestGetNewReleases(t *testing.T) {
@@ -153,9 +136,9 @@ func TestGetNewReleases(t *testing.T) {
 		Albums *SimplifiedAlbumChunk
 	}
 
-	targetWrapper := &w{
+	targetAlbumChunk := &w{
 		Albums: albumChunk,
 	}
-	sourceWrapper := &w{}
-	testDiffs(t, body, &sourceWrapper, &targetWrapper)
+	sourceAlbumChunk := &w{}
+	testDiffs(t, body, &sourceAlbumChunk, &targetAlbumChunk)
 }

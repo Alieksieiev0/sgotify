@@ -3,10 +3,10 @@ package api
 import "fmt"
 
 type Category struct {
-	Href  string        `json:"href"`
-	Icons []ImageObject `json:"icons"`
-	Id    string        `json:"id"`
-	Name  string        `json:"name"`
+	Href  string  `json:"href"`
+	Icons []Image `json:"icons"`
+	Id    string  `json:"id"`
+	Name  string  `json:"name"`
 }
 
 func (s *Spotify) GetBrowseCategory(id string, params ...Param) (*Category, error) {
@@ -15,9 +15,9 @@ func (s *Spotify) GetBrowseCategory(id string, params ...Param) (*Category, erro
 	return category, err
 }
 
-func (s *Spotify) GetBrowseCategories(params ...Param) ([]*Category, error) {
+func (s *Spotify) GetBrowseCategories(params ...Param) (*CategoryChunk, error) {
 	var w struct {
-		Categories []*Category `json:"categories"`
+		Categories *CategoryChunk `json:"categories"`
 	}
 	err := s.Get(&w, "/browse/categories", params...)
 	return w.Categories, err

@@ -6,23 +6,23 @@ import (
 )
 
 type SimplifiedShow struct {
-	AvailableMarkets   []string      `json:"available_markets"`
-	Copyrights         Copyright     `json:"copyrights"`
-	Description        string        `json:"description"`
-	HtmlDescription    string        `json:"html_description"`
-	Explicit           bool          `json:"explicit"`
-	ExternalURLs       ExternalURL   `json:"external_urls"`
-	Href               string        `json:"href"`
-	Id                 string        `json:"id"`
-	Images             []ImageObject `json:"images"`
-	IsExternallyHosted bool          `json:"is_externally_hosted"`
-	Languages          []string      `json:"languages"`
-	MediaType          string        `json:"media_type"`
-	Name               string        `json:"name"`
-	Publisher          string        `json:"publisher"`
-	Type               string        `json:"type"`
-	URI                string        `json:"uri"`
-	TotalEpisodes      int           `json:"total_episodes"`
+	AvailableMarkets   []string    `json:"available_markets"`
+	Copyrights         []Copyright `json:"copyrights"`
+	Description        string      `json:"description"`
+	HtmlDescription    string      `json:"html_description"`
+	Explicit           bool        `json:"explicit"`
+	ExternalURLs       ExternalURL `json:"external_urls"`
+	Href               string      `json:"href"`
+	Id                 string      `json:"id"`
+	Images             []Image     `json:"images"`
+	IsExternallyHosted bool        `json:"is_externally_hosted"`
+	Languages          []string    `json:"languages"`
+	MediaType          string      `json:"media_type"`
+	Name               string      `json:"name"`
+	Publisher          string      `json:"publisher"`
+	Type               string      `json:"type"`
+	URI                string      `json:"uri"`
+	TotalEpisodes      int         `json:"total_episodes"`
 }
 
 type FullShow struct {
@@ -40,13 +40,13 @@ func (s *Spotify) GetShows(ids []string, params ...Param) ([]*FullShow, error) {
 	var w struct {
 		Shows []*FullShow `json:"shows"`
 	}
-	err := s.Get(&w, "/shows?ids="+strings.Join(ids, ","), params...)
+	err := s.Get(&w, fmt.Sprintf("/shows?ids=%s", strings.Join(ids, ",")), params...)
 	return w.Shows, err
 }
 
 func (s *Spotify) GetShowEpisodes(id string, params ...Param) (*SimplifiedEpisodeChunk, error) {
 	episodeChunk := &SimplifiedEpisodeChunk{}
-	err := s.Get(episodeChunk, "/shows/"+id+"/episodes", params...)
+	err := s.Get(episodeChunk, fmt.Sprintf("/shows/%s/episodes", id), params...)
 	return episodeChunk, err
 }
 
@@ -57,15 +57,15 @@ func (s *Spotify) GetUserSavedShows(params ...Param) (*SimplifiedShowChunk, erro
 }
 
 func (s *Spotify) SaveShowsForCurrentUser(ids []string) error {
-	return s.Put(nil, "/me/shows?ids="+strings.Join(ids, ","), []byte{})
+	return s.Put(nil, fmt.Sprintf("/me/shows?ids=%s", strings.Join(ids, ",")), []byte{})
 }
 
 func (s *Spotify) RemoveUserSavedShows(ids []string) error {
-	return s.Delete(nil, "/me/shows?ids="+strings.Join(ids, ","), []byte{})
+	return s.Delete(nil, fmt.Sprintf("/me/shows?ids=%s", strings.Join(ids, ",")), []byte{})
 }
 
-func (s *Spotify) CheckUserSavedShows(ids []string) ([]*bool, error) {
-	containmentInfo := []*bool{}
-	err := s.Get(&containmentInfo, "/me/shows/contains?ids="+strings.Join(ids, ","))
+func (s *Spotify) CheckUserSavedShows(ids []string) ([]bool, error) {
+	containmentInfo := []bool{}
+	err := s.Get(&containmentInfo, fmt.Sprintf("/me/shows/contains?ids=%s", strings.Join(ids, ",")))
 	return containmentInfo, err
 }

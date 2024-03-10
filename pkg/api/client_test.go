@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+const testId = "4aawyAB9vmqN3uQ7FjRGTy"
+
+func getTestIds() []string {
+	return []string{}
+}
+
 func testServer(handler http.HandlerFunc) (*httptest.Server, *Spotify) {
 	server := httptest.NewServer(handler)
 	spotify := &Spotify{
@@ -16,6 +22,10 @@ func testServer(handler http.HandlerFunc) (*httptest.Server, *Spotify) {
 	}
 
 	return server, spotify
+}
+
+func testHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {}
 }
 
 func testBodyOnlyHandler(body []byte) http.HandlerFunc {
@@ -27,51 +37,13 @@ func testBodyOnlyHandler(body []byte) http.HandlerFunc {
 	}
 }
 
-func testIdsOnlyHandler(ids []string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		err := validateMultipleIds(ids, r)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-func testSingleIdHandler(id string, body []byte) http.HandlerFunc {
+func testSingleIdHandler(body []byte) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqId := path.Base(r.URL.String())
-		if reqId != id {
-			error := fmt.Errorf("Expected %s, got %s", id, reqId)
-			panic(error)
+		if reqId != testId {
+			panic(fmt.Errorf("Expected %s, got %s", testId, reqId))
 		}
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write(body)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
 
-func testMultipleIdsHandler(ids []string, body []byte) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		err := validateMultipleIds(ids, r)
-		if err != nil {
-			panic(err)
-		}
-		err = writeResponse(w, body)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-func testRelatedObjectHandler(id string, body []byte) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		urlPath := strings.Split(r.URL.String(), "/")
-		reqId := urlPath[len(urlPath)-2]
-		if reqId != id {
-			error := fmt.Errorf("Expected Id %s, got %s", id, reqId)
-			panic(error)
-		}
 		err := writeResponse(w, body)
 		if err != nil {
 			panic(err)
@@ -79,8 +51,47 @@ func testRelatedObjectHandler(id string, body []byte) http.HandlerFunc {
 	}
 }
 
-func validateMultipleIds(ids []string, r *http.Request) error {
-	joinedIds := strings.Join(ids, ",")
+func testMultipleIdsHandler(body []byte) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := validateMultipleIds(r)
+		if err != nil {
+			panic(err)
+		}
+
+		err = writeResponse(w, body)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func testIdsOnlyHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := validateMultipleIds(r)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func testRelatedObjectHandler(body []byte) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		urlPath := strings.Split(r.URL.String(), "/")
+		reqId := urlPath[len(urlPath)-2]
+		if reqId != testId {
+			error := fmt.Errorf("Expected Id %s, got %s", testId, reqId)
+			panic(error)
+		}
+
+		err := writeResponse(w, body)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func validateMultipleIds(r *http.Request) error {
+	joinedIds := strings.Join(getTestIds(), ",")
 	reqIds := r.URL.Query().Get("ids")
 	if reqIds != joinedIds {
 		return fmt.Errorf("Expected %s, got %s", joinedIds, reqIds)

@@ -10,7 +10,7 @@ type SimplifiedEpisode struct {
 	AudioPreviewUrl      string           `json:"audio_preview_url"`
 	Description          string           `json:"description"`
 	HtmlDescription      string           `json:"html_description"`
-	Images               []ImageObject    `json:"images"`
+	Images               []Image          `json:"images"`
 	IsExternallyHosted   bool             `json:"is_externally_hosted"`
 	Languages            []string         `json:"languages"`
 	ReleaseDate          string           `json:"release_date"`
@@ -40,7 +40,7 @@ func (s *Spotify) GetEpisodes(ids []string, params ...Param) ([]*FullEpisode, er
 	var w struct {
 		Episodes []*FullEpisode `json:"episodes"`
 	}
-	err := s.Get(&w, "/episodes?ids="+strings.Join(ids, ","), params...)
+	err := s.Get(&w, fmt.Sprintf("/episodes?ids=%s", strings.Join(ids, ",")), params...)
 	return w.Episodes, err
 }
 
@@ -51,15 +51,18 @@ func (s *Spotify) GetUserSavedEpisodes(params ...Param) (*SavedEpisodeChunk, err
 }
 
 func (s *Spotify) SaveEpisodesForCurrentUser(ids []string) error {
-	return s.Put(nil, "/me/episodes?ids="+strings.Join(ids, ","), []byte{})
+	return s.Put(nil, fmt.Sprintf("/me/episodes?ids=%s", strings.Join(ids, ",")), []byte{})
 }
 
 func (s *Spotify) RemoveUserSavedEpisodes(ids []string) error {
-	return s.Delete(nil, "/me/episodes?ids="+strings.Join(ids, ","), []byte{})
+	return s.Delete(nil, fmt.Sprintf("/me/episodes?ids=%s", strings.Join(ids, ",")), []byte{})
 }
 
-func (s *Spotify) CheckUserSavedEpisodes(ids []string) ([]*bool, error) {
-	containmentInfo := []*bool{}
-	err := s.Get(&containmentInfo, "/me/episodes/contains?ids="+strings.Join(ids, ","))
+func (s *Spotify) CheckUserSavedEpisodes(ids []string) ([]bool, error) {
+	containmentInfo := []bool{}
+	err := s.Get(
+		&containmentInfo,
+		fmt.Sprintf("/me/episodes/contains?ids=%s", strings.Join(ids, ",")),
+	)
 	return containmentInfo, err
 }

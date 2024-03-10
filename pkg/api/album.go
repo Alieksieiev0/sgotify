@@ -12,7 +12,7 @@ type SimplifiedAlbum struct {
 	ExternalURLs         ExternalURL        `json:"external_urls"`
 	Href                 string             `json:"href"`
 	Id                   string             `json:"id"`
-	Images               []ImageObject      `json:"images"`
+	Images               []Image            `json:"images"`
 	Name                 string             `json:"name"`
 	ReleaseDate          string             `json:"release_date"`
 	ReleaseDatePrecision string             `json:"release_date_precision"`
@@ -20,6 +20,11 @@ type SimplifiedAlbum struct {
 	Type                 string             `json:"type"`
 	Uri                  string             `json:"uri"`
 	Artists              []SimplifiedArtist `json:"artists"`
+}
+
+type Copyright struct {
+	Text string `json:"text"`
+	Type string `json:"type"`
 }
 
 type FullAlbum struct {
@@ -32,11 +37,6 @@ type FullAlbum struct {
 	Popularity  int                  `json:"popularity"`
 }
 
-type Copyright struct {
-	Text string `json:"text"`
-	Type string `json:"type"`
-}
-
 func (s *Spotify) GetAlbum(id string, params ...Param) (*FullAlbum, error) {
 	album := &FullAlbum{}
 	err := s.Get(album, fmt.Sprintf("/albums/%s", id), params...)
@@ -47,13 +47,13 @@ func (s *Spotify) GetAlbums(ids []string, params ...Param) ([]*FullAlbum, error)
 	var w struct {
 		Albums []*FullAlbum `json:"albums"`
 	}
-	err := s.Get(&w, "/albums?ids="+strings.Join(ids, ","), params...)
+	err := s.Get(&w, fmt.Sprintf("/albums?ids=%s", strings.Join(ids, ",")), params...)
 	return w.Albums, err
 }
 
 func (s *Spotify) GetAlbumTracks(id string, params ...Param) (*SimplifiedTrackChunk, error) {
 	trackChunck := &SimplifiedTrackChunk{}
-	err := s.Get(trackChunck, "/albums/"+id+"/tracks", params...)
+	err := s.Get(trackChunck, fmt.Sprintf("/albums/%s/tracks", id), params...)
 	return trackChunck, err
 }
 
@@ -64,16 +64,19 @@ func (s *Spotify) GetUserSavedAlbums(params ...Param) (*SimplifiedAlbumChunk, er
 }
 
 func (s *Spotify) SaveAlbumsForCurrentUser(ids []string) error {
-	return s.Put(nil, "/me/albums?ids="+strings.Join(ids, ","), []byte{})
+	return s.Put(nil, fmt.Sprintf("/me/albums?ids=%s", strings.Join(ids, ",")), []byte{})
 }
 
 func (s *Spotify) RemoveUserSavedAlbums(ids []string) error {
-	return s.Delete(nil, "/me/albums?ids="+strings.Join(ids, ","), []byte{})
+	return s.Delete(nil, fmt.Sprintf("/me/albums?ids=%s", strings.Join(ids, ",")), []byte{})
 }
 
-func (s *Spotify) CheckUserSavedAlbums(ids []string) ([]*bool, error) {
-	containmentInfo := []*bool{}
-	err := s.Get(&containmentInfo, "/me/albums/contains?ids="+strings.Join(ids, ","))
+func (s *Spotify) CheckUserSavedAlbums(ids []string) ([]bool, error) {
+	containmentInfo := []bool{}
+	err := s.Get(
+		&containmentInfo,
+		fmt.Sprintf("/me/albums/contains?ids=%s", strings.Join(ids, ",")),
+	)
 	return containmentInfo, err
 }
 

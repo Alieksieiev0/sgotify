@@ -16,7 +16,7 @@ type SimplifiedChapter struct {
 	ExternalURLs         ExternalURL      `json:"external_urls"`
 	Href                 string           `json:"href"`
 	Id                   string           `json:"id"`
-	Images               ImageObject      `json:"images"`
+	Images               []Image          `json:"images"`
 	IsPlayable           bool             `json:"is_playable"`
 	Languages            []string         `json:"languages"`
 	Name                 string           `json:"name"`
@@ -43,6 +43,6 @@ func (s *Spotify) GetChapters(ids []string, params ...Param) ([]*FullChapter, er
 	var w struct {
 		Chapters []*FullChapter `json:"chapters"`
 	}
-	err := s.Get(&w, "/chapters?ids="+strings.Join(ids, ","), params...)
+	err := s.Get(&w, fmt.Sprintf("/chapters?ids=%s", strings.Join(ids, ",")), params...)
 	return w.Chapters, err
 }

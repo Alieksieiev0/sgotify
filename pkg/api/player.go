@@ -2,21 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"strconv"
+	"fmt"
 )
-
-type Playback struct {
-	Device               Device      `json:"device"`
-	RepeatState          string      `json:"repeat_state"`
-	ShuffleState         bool        `json:"shuffle_state"`
-	Context              Context     `json:"context"`
-	Timestamp            int         `json:"timestamp"`
-	ProgressMs           int         `json:"progress_ms"`
-	IsPlaying            bool        `json:"is_playing"`
-	Item                 interface{} `json:"item"`
-	CurrentlyPlayingType string      `json:"currently_playing_type"`
-	Actions              Actions     `json:"actions"`
-}
 
 type Device struct {
 	Id               string `json:"id"`
@@ -49,6 +36,30 @@ type Actions struct {
 	TransferingPlayback   bool `json:"transfering_playback"`
 }
 
+type Playback struct {
+	Device               Device  `json:"device"`
+	RepeatState          string  `json:"repeat_state"`
+	ShuffleState         bool    `json:"shuffle_state"`
+	Context              Context `json:"context"`
+	Timestamp            int     `json:"timestamp"`
+	ProgressMs           int     `json:"progress_ms"`
+	IsPlaying            bool    `json:"is_playing"`
+	Item                 Item    `json:"item"`
+	CurrentlyPlayingType string  `json:"currently_playing_type"`
+	Actions              Actions `json:"actions"`
+}
+
+type Cursors struct {
+	After  string `json:"after"`
+	Before string `json:"before"`
+}
+
+type PlayHistory struct {
+	Track    FullTrack `json:"track"`
+	PlayedAt string    `json:"played_at"`
+	Context  Context   `json:"context"`
+}
+
 type RecentlyPlayedTracks struct {
 	Href    string        `json:"href"`
 	Limit   int           `json:"limit"`
@@ -58,20 +69,9 @@ type RecentlyPlayedTracks struct {
 	Items   []PlayHistory `json:"items"`
 }
 
-type Cursors struct {
-	After  string `json:"after"`
-	Before string `json:"before"`
-}
-
-type PlayHistory struct {
-	Track    SimplifiedTrack `json:"track"`
-	PlayedAt string          `json:"played_at"`
-	Context  Context         `json:"context"`
-}
-
 type UserQueue struct {
-	CurrentlyPlaying interface{}   `json:"currently_playing"`
-	Queue            []interface{} `json:"queue"`
+	CurrentlyPlaying Item   `json:"currently_playing"`
+	Queue            []Item `json:"queue"`
 }
 
 func (s *Spotify) GetPlaybackState(params ...Param) (*Playback, error) {
@@ -149,19 +149,19 @@ func (s *Spotify) SkipToPrevious(params ...Param) error {
 func (s *Spotify) SeekToPosition(positionMs int, params ...Param) error {
 	return s.Put(
 		nil,
-		"/me/player/seek?position_ms="+strconv.Itoa(positionMs),
+		fmt.Sprintf("/me/player/seek?position_ms=%d", positionMs),
 		[]byte{},
 		params...)
 }
 
 func (s *Spotify) SetRepeatMode(state string, params ...Param) error {
-	return s.Put(nil, "/me/player/repeat?state="+state, []byte{}, params...)
+	return s.Put(nil, fmt.Sprintf("/me/player/repeat?state=%s", state), []byte{}, params...)
 }
 
 func (s *Spotify) SetPlaybackVolume(volumePercent int, params ...Param) error {
 	return s.Put(
 		nil,
-		"/me/player/volume?volume_percent="+strconv.Itoa(volumePercent),
+		fmt.Sprintf("/me/player/volume?volume_percent=%d", volumePercent),
 		[]byte{},
 		params...)
 }
@@ -169,7 +169,7 @@ func (s *Spotify) SetPlaybackVolume(volumePercent int, params ...Param) error {
 func (s *Spotify) TogglePlaybackShuffle(state bool, params ...Param) error {
 	return s.Put(
 		nil,
-		"/me/player/shuffle?boolean="+strconv.FormatBool(state),
+		fmt.Sprintf("/me/player/shuffle?boolean=%t", state),
 		[]byte{},
 		params...)
 }
@@ -187,5 +187,5 @@ func (s *Spotify) GetUserQueue() (*UserQueue, error) {
 }
 
 func (s *Spotify) AddItemToPlaybackQueue(URI string, params ...Param) error {
-	return s.Put(nil, "/me/player/queue?uri="+URI, []byte{}, params...)
+	return s.Put(nil, fmt.Sprintf("/me/player/queue?uri=%s", URI), []byte{}, params...)
 }

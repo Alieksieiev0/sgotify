@@ -1,72 +1,200 @@
 package api
 
 import (
-	"net/http"
-	"reflect"
+	"os"
 	"testing"
 )
 
-func TestSpotify_TransferPlayback(t *testing.T) {
-	type fields struct {
-		client *http.Client
-		url    string
+func TestGetPlaybackState(t *testing.T) {
+	body, err := os.ReadFile("testdata/playback.json")
+	if err != nil {
+		t.Fatal(err)
 	}
-	type args struct {
-		deviceIds []string
-		play      bool
+
+	server, spotify := testServer(testBodyOnlyHandler(body))
+	defer server.Close()
+
+	playback, err := spotify.GetPlaybackState()
+	if err != nil {
+		t.Fatal(err)
 	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &Spotify{
-				client: tt.fields.client,
-				url:    tt.fields.url,
-			}
-			if err := s.TransferPlayback(tt.args.deviceIds, tt.args.play); (err != nil) != tt.wantErr {
-				t.Errorf("Spotify.TransferPlayback() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+
+	sourcePlayback := &Playback{}
+	testDiffs(t, body, sourcePlayback, playback)
+}
+
+func TestTransferPlayback(t *testing.T) {
+	server, spotify := testServer(testHandler())
+	defer server.Close()
+
+	err := spotify.TransferPlayback([]string{"1,2"}, false)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
-func TestSpotify_GetPlaybackState(t *testing.T) {
-	type fields struct {
-		client *http.Client
-		url    string
+func TestGetAvailableDevices(t *testing.T) {
+	body, err := os.ReadFile("testdata/devices.json")
+	if err != nil {
+		t.Fatal(err)
 	}
-	type args struct {
-		params []Param
+
+	server, spotify := testServer(testBodyOnlyHandler(body))
+	defer server.Close()
+
+	devices, err := spotify.GetAvailableDevices()
+	if err != nil {
+		t.Fatal(err)
 	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *Playback
-		wantErr bool
-	}{
-		// TODO: Add test cases.
+	type w struct {
+		Devices []*Device
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &Spotify{
-				client: tt.fields.client,
-				url:    tt.fields.url,
-			}
-			got, err := s.GetPlaybackState(tt.args.params...)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Spotify.GetPlaybackState() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Spotify.GetPlaybackState() = %v, want %v", got, tt.want)
-			}
-		})
+
+	targetDevices := &w{devices}
+	sourceDevices := &w{}
+	testDiffs(t, body, sourceDevices, targetDevices)
+}
+
+func TestGetCurrentlyPlayingTrack(t *testing.T) {
+	body, err := os.ReadFile("testdata/currentlyPlayingTrack.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	server, spotify := testServer(testBodyOnlyHandler(body))
+	defer server.Close()
+
+	playback, err := spotify.GetCurrentlyPlayingTrack()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sourcePlayback := &Playback{}
+	testDiffs(t, body, sourcePlayback, playback)
+}
+
+func TestStartResumePlayback(t *testing.T) {
+	server, spotify := testServer(testHandler())
+	defer server.Close()
+
+	err := spotify.StartResumePlayback("test", []string{"test"}, nil, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPausePlayback(t *testing.T) {
+	server, spotify := testServer(testHandler())
+	defer server.Close()
+
+	err := spotify.PausePlayback()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSkipToNext(t *testing.T) {
+	server, spotify := testServer(testHandler())
+	defer server.Close()
+
+	err := spotify.SkipToNext()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSkipToPrevious(t *testing.T) {
+	server, spotify := testServer(testHandler())
+	defer server.Close()
+
+	err := spotify.SkipToPrevious()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSeekToPosition(t *testing.T) {
+	server, spotify := testServer(testHandler())
+	defer server.Close()
+
+	err := spotify.SeekToPosition(5)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSetRepeatMode(t *testing.T) {
+	server, spotify := testServer(testHandler())
+	defer server.Close()
+
+	err := spotify.SetRepeatMode("context")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSetPlaybackVolume(t *testing.T) {
+	server, spotify := testServer(testHandler())
+	defer server.Close()
+
+	err := spotify.SetPlaybackVolume(10)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestTogglePlaybackShuffle(t *testing.T) {
+	server, spotify := testServer(testHandler())
+	defer server.Close()
+
+	err := spotify.TogglePlaybackShuffle(false)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGetRecentlyPlayedTracks(t *testing.T) {
+	body, err := os.ReadFile("testdata/recentlyPlayedTracks.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	server, spotify := testServer(testBodyOnlyHandler(body))
+	defer server.Close()
+
+	tracks, err := spotify.GetRecentlyPlayedTracks()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sourceTracks := &RecentlyPlayedTracks{}
+	testDiffs(t, body, sourceTracks, tracks)
+}
+
+func TestGetUserQueue(t *testing.T) {
+	body, err := os.ReadFile("testdata/userQueue.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	server, spotify := testServer(testBodyOnlyHandler(body))
+	defer server.Close()
+
+	queue, err := spotify.GetUserQueue()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sourceQueue := &UserQueue{}
+	testDiffs(t, body, sourceQueue, queue)
+}
+
+func TestAddItemToPlaybackQueue(t *testing.T) {
+	server, spotify := testServer(testHandler())
+	defer server.Close()
+
+	err := spotify.AddItemToPlaybackQueue("test")
+	if err != nil {
+		t.Fatal(err)
 	}
 }

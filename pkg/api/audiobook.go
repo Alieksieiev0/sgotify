@@ -14,9 +14,9 @@ type Narrator struct {
 }
 
 type SimplifiedAudiobook struct {
-	Authors          Author      `json:"authors"`
+	Authors          []Author    `json:"authors"`
 	AvailableMarkets []string    `json:"available_markets"`
-	Copyrights       Copyright   `json:"copyrights"`
+	Copyrights       []Copyright `json:"copyrights"`
 	Description      string      `json:"description"`
 	HtmlDescription  string      `json:"html_description"`
 	Edition          string      `json:"edition"`
@@ -24,11 +24,11 @@ type SimplifiedAudiobook struct {
 	ExternalURLs     ExternalURL `json:"external_urls"`
 	Href             string
 	Id               string
-	Images           ImageObject
+	Images           []Image
 	Languages        []string
 	MediaType        string
 	Name             string
-	Narrators        Narrator
+	Narrators        []Narrator
 	Publisher        string
 	Type             string
 	URI              string
@@ -50,7 +50,7 @@ func (s *Spotify) GetAudiobooks(ids []string, params ...Param) ([]*FullAudiobook
 	var w struct {
 		Audiobooks []*FullAudiobook `json:"audiobooks"`
 	}
-	err := s.Get(&w, "/audiobooks?ids="+strings.Join(ids, ","), params...)
+	err := s.Get(&w, fmt.Sprintf("/audiobooks?ids=%s", strings.Join(ids, ",")), params...)
 	return w.Audiobooks, err
 }
 
@@ -59,7 +59,7 @@ func (s *Spotify) GetAudiobookChapters(
 	params ...Param,
 ) (*SimplifiedChapterChunk, error) {
 	chapterChunk := &SimplifiedChapterChunk{}
-	err := s.Get(chapterChunk, "/audiobooks/"+id+"/chapters", params...)
+	err := s.Get(chapterChunk, fmt.Sprintf("/audiobooks/%s/chapters", id), params...)
 	return chapterChunk, err
 }
 
@@ -70,15 +70,18 @@ func (s *Spotify) GetUserSavedAudiobooks(params ...Param) (*SimplifiedAudiobookC
 }
 
 func (s *Spotify) SaveAudiobooksForCurrentUser(ids []string) error {
-	return s.Put(nil, "/me/audiobooks?ids="+strings.Join(ids, ","), []byte{})
+	return s.Put(nil, fmt.Sprintf("/me/audiobooks?ids=%s", strings.Join(ids, ",")), []byte{})
 }
 
 func (s *Spotify) RemoveUserSavedAudiobooks(ids []string) error {
-	return s.Delete(nil, "/me/audiobooks?ids="+strings.Join(ids, ","), []byte{})
+	return s.Delete(nil, fmt.Sprintf("/me/audiobooks?ids=%s", strings.Join(ids, ",")), []byte{})
 }
 
-func (s *Spotify) CheckUserSavedAudiobooks(ids []string) ([]*bool, error) {
-	containmentInfo := []*bool{}
-	err := s.Get(&containmentInfo, "/me/audiobooks/contains?ids="+strings.Join(ids, ","))
+func (s *Spotify) CheckUserSavedAudiobooks(ids []string) ([]bool, error) {
+	containmentInfo := []bool{}
+	err := s.Get(
+		&containmentInfo,
+		fmt.Sprintf("/me/audiobooks/contains?ids=%s", strings.Join(ids, ",")),
+	)
 	return containmentInfo, err
 }

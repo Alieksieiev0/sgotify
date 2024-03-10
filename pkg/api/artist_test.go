@@ -3,23 +3,21 @@ package api
 import (
 	"encoding/json"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestGetArtist(t *testing.T) {
-	id := "0TnOYISbd1XYRBk9myaseg"
 	body, err := os.ReadFile("testdata/artist.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	server, spotify := testServer(testSingleIdHandler(id, body))
+	server, spotify := testServer(testSingleIdHandler(body))
 	defer server.Close()
 
-	artist, err := spotify.GetArtist(id)
+	artist, err := spotify.GetArtist(testId)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -28,19 +26,15 @@ func TestGetArtist(t *testing.T) {
 }
 
 func TestGetArtists(t *testing.T) {
-	ids := strings.Split(
-		"2CIMQHirSU0MQqyYHq0eOx,57dN52uHvrHOxijzpIgu3E,1vCWHaC5f2uS3yhpwWbIA6",
-		",",
-	)
 	body, err := os.ReadFile("testdata/artists.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	server, spotify := testServer(testMultipleIdsHandler(ids, body))
+	server, spotify := testServer(testMultipleIdsHandler(body))
 	defer server.Close()
 
-	artists, err := spotify.GetArtists(ids)
+	artists, err := spotify.GetArtists(getTestIds())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,24 +42,23 @@ func TestGetArtists(t *testing.T) {
 		Artists []*FullArtist
 	}
 
-	targetWrapper := &w{
+	targetArtists := &w{
 		Artists: artists,
 	}
-	sourceWrapper := &w{}
-	testDiffs(t, body, &sourceWrapper, &targetWrapper)
+	sourceArtists := &w{}
+	testDiffs(t, body, &sourceArtists, &targetArtists)
 }
 
 func TestGetArtistAlbums(t *testing.T) {
-	id := "0TnOYISbd1XYRBk9myaseg"
 	body, err := os.ReadFile("testdata/artistAlbums.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	server, spotify := testServer(testRelatedObjectHandler(id, body))
+	server, spotify := testServer(testRelatedObjectHandler(body))
 	defer server.Close()
 
-	albumChunk, err := spotify.GetArtistAlbums(id)
+	albumChunk, err := spotify.GetArtistAlbums(testId)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,16 +67,15 @@ func TestGetArtistAlbums(t *testing.T) {
 }
 
 func TestGetArtisTopTracks(t *testing.T) {
-	id := "0TnOYISbd1XYRBk9myaseg"
 	body, err := os.ReadFile("testdata/artistTopTracks.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	server, spotify := testServer(testRelatedObjectHandler(id, body))
+	server, spotify := testServer(testRelatedObjectHandler(body))
 	defer server.Close()
 
-	topTracks, err := spotify.GetArtistTopTracks(id)
+	topTracks, err := spotify.GetArtistTopTracks(testId)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,22 +84,21 @@ func TestGetArtisTopTracks(t *testing.T) {
 		Tracks []*FullTrack
 	}
 
-	targetWrapper := &w{topTracks}
-	sourceWrapper := &w{}
-	testDiffs(t, body, &sourceWrapper, &targetWrapper)
+	targetTracks := &w{topTracks}
+	sourceTracks := &w{}
+	testDiffs(t, body, &sourceTracks, &targetTracks)
 }
 
 func TestGetArtisRelatedArtists(t *testing.T) {
-	id := "0TnOYISbd1XYRBk9myaseg"
 	body, err := os.ReadFile("testdata/artistRelatedArtists.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	server, spotify := testServer(testRelatedObjectHandler(id, body))
+	server, spotify := testServer(testRelatedObjectHandler(body))
 	defer server.Close()
 
-	relatedArtists, err := spotify.GetArtistRelatedArtists(id)
+	relatedArtists, err := spotify.GetArtistRelatedArtists(testId)
 	if err != nil {
 		t.Fatal(err)
 	}

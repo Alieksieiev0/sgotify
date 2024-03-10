@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+type ExplicitContent struct {
+	FilterEnabled bool `json:"filter_enabled"`
+	FilterLocked  bool `json:"filter_locked"`
+}
+
 type User struct {
 	Country         string          `json:"country"`
 	DisplayName     string          `json:"display_name"`
@@ -15,15 +20,10 @@ type User struct {
 	Followers       Follower        `json:"followers"`
 	Href            string          `json:"href"`
 	Id              string          `json:"id"`
-	Images          []ImageObject   `json:"images"`
+	Images          []Image         `json:"images"`
 	Product         string          `json:"product"`
 	Type            string          `json:"type"`
 	URI             string          `json:"uri"`
-}
-
-type ExplicitContent struct {
-	FilterEnabled bool `json:"filter_enabled"`
-	FilterLocked  bool `json:"filter_locked"`
 }
 
 func (s *Spotify) GetCurrentUserProfile() (*User, error) {
@@ -34,13 +34,13 @@ func (s *Spotify) GetCurrentUserProfile() (*User, error) {
 
 func (s *Spotify) GetUserTopItems(itemsType string, params ...Param) (*UserItemChunk, error) {
 	userItemChunk := &UserItemChunk{}
-	err := s.Get(userItemChunk, "/me/top/"+itemsType, params...)
+	err := s.Get(userItemChunk, fmt.Sprintf("/me/top/%s", itemsType), params...)
 	return userItemChunk, err
 }
 
 func (s *Spotify) GetUserProfile(id string) (*User, error) {
 	user := &User{}
-	err := s.Get(user, "/me/"+id)
+	err := s.Get(user, fmt.Sprintf("/me/%s", id))
 	return user, err
 }
 
