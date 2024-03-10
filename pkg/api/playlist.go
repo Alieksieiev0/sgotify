@@ -16,10 +16,10 @@ type PlaylistOwner struct {
 }
 
 type PlaylistTrack struct {
-	AddedAt string `json:"added_at"`
-	AddedBy string `json:"added_by"`
-	IsLocal bool   `json:"is_local"`
-	Track   Item   `json:"track"`
+	AddedAt string        `json:"added_at"`
+	AddedBy PlaylistOwner `json:"added_by"`
+	IsLocal bool          `json:"is_local"`
+	Track   Item          `json:"track"`
 }
 
 type SimplifiedPlaylist struct {
@@ -59,11 +59,8 @@ func (s *Spotify) GetPlaylist(id string, params ...Param) (*FullPlaylist, error)
 }
 
 func (s *Spotify) ChangePlaylistDetails(
-	id string,
-	name string,
-	public bool,
-	collaborative bool,
-	description string,
+	id, name, description string,
+	public, collaborative bool,
 ) error {
 	w := struct {
 		Name          string `json:"name"`
@@ -91,11 +88,9 @@ func (s *Spotify) GetPlaylistItems(id string, params ...Param) (*PlaylistTrackCh
 }
 
 func (s *Spotify) UpdatePlaylistItems(
-	id string,
+	id, snapshotId string,
+	rangeStart, insertBefore int,
 	URIs []string,
-	rangeStart int,
-	insertBefore int,
-	snapshotId string,
 	params ...Param,
 ) (*Snapshot, error) {
 	snapshot := &Snapshot{}
@@ -120,8 +115,8 @@ func (s *Spotify) UpdatePlaylistItems(
 
 func (s *Spotify) AddItemsToPlaylist(
 	id string,
-	URIs []string,
 	position int,
+	URIs []string,
 	params ...Param,
 ) (*Snapshot, error) {
 	snapshot := &Snapshot{}
@@ -140,15 +135,11 @@ func (s *Spotify) AddItemsToPlaylist(
 	return snapshot, err
 }
 
-func (s *Spotify) RemovePlaylistItem(
-	id string,
-	tracks interface{},
-	snapshotId int,
-) (*Snapshot, error) {
+func (s *Spotify) RemovePlaylistItem(id, snapshotId string, tracks interface{}) (*Snapshot, error) {
 	snapshot := &Snapshot{}
 	w := struct {
 		Tracks     interface{} `json:"tracks"`
-		SnapshotId int         `json:"snapshot_id"`
+		SnapshotId string      `json:"snapshot_id"`
 	}{
 		tracks,
 		snapshotId,
@@ -177,13 +168,9 @@ func (s *Spotify) GetUserPlaylists(
 }
 
 func (s *Spotify) CreatePlaylist(
-	userId string,
-	name string,
-	public bool,
-	collaborative bool,
-	description string,
-) (*SimplifiedPlaylist, error) {
-	playlist := &SimplifiedPlaylist{}
+	userId, name, description string,
+	public, collaborative bool,
+) error {
 	w := struct {
 		Name          string `json:"name"`
 		Public        bool   `json:"snapshot_id"`
@@ -197,10 +184,9 @@ func (s *Spotify) CreatePlaylist(
 	}
 	body, err := json.Marshal(w)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	err = s.Post(playlist, fmt.Sprintf("/users/%s/playlists", userId), body)
-	return playlist, err
+	return s.Post(nil, fmt.Sprintf("/users/%s/playlists", userId), body)
 }
 
 func (s *Spotify) GetFeaturedPlaylists(params ...Param) (*DescribedPlaylist, error) {
@@ -222,7 +208,7 @@ func (s *Spotify) GetCategoryPlaylists(
 }
 
 func (s *Spotify) GetPlaylistCoverImage(id string) ([]*Image, error) {
-	imageObjects := []*Image{}
-	err := s.Get(&imageObjects, fmt.Sprintf("/playlists/%s/images", id))
-	return imageObjects, err
+	image := []*Image{}
+	err := s.Get(&image, fmt.Sprintf("/playlists/%s/images", id))
+	return image, err
 }
