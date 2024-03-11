@@ -25,8 +25,7 @@ func Run() {
 	)
 	token, err := term.Authorize(ctx)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
 
 	spotify := api.NewSpotifyClient(ctx, token)
