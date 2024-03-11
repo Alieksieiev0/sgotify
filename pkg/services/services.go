@@ -8,28 +8,22 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"runtime"
 	"syscall"
 
 	"github.com/Alieksieiev0/sgotify/pkg/auth"
 	"golang.org/x/oauth2"
 )
 
+// Terminal is responsible for implementing the functionality of Authorization for
+// apps running in the terminal.
 type Terminal struct {
 	service auth.Service
 }
 
+// Authorize authorizes app, considering that the authorization was requested from Terminal.
+// It will open the auth link in default app, run callback server to capture the Authorization Code and exchange it.
 func (t Terminal) Authorize(ctx context.Context) (*oauth2.Token, error) {
-	var cmd string
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-	case "darwin":
-		cmd = "open"
-	default:
-		cmd = "xdg-open"
-	}
-	err := exec.Command(cmd, t.service.AuthURL("state")).Start()
+	err := exec.Command("xdg-open", t.service.AuthURL("state")).Start()
 	if err != nil {
 		log.Fatal("failure starting open command: ", err)
 	}
@@ -44,6 +38,7 @@ func (t Terminal) Authorize(ctx context.Context) (*oauth2.Token, error) {
 	return token, nil
 }
 
+// runCallbackServer opens the HTTP server and runs it until the interrupt signal is received.
 func runCallbackServer(code *string) {
 	http.HandleFunc("/callback", handleCallback(code))
 	s := &http.Server{Addr: "localhost:8888"}
@@ -63,6 +58,8 @@ func runCallbackServer(code *string) {
 	}
 }
 
+// handleCallback tries to get the Authorization Code from the url,
+// and in case of success it sends the Interrupt Signal.
 func handleCallback(code *string) http.HandlerFunc {
 	return func(_ http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
@@ -71,10 +68,14 @@ func handleCallback(code *string) http.HandlerFunc {
 		}
 
 		*code = q.Get("code")
-		syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+		err := syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+		if err != nil {
+			log.Fatal("could not kill the server: ", err)
+		}
 	}
 }
 
+// NewTerminal creates a terminal service, using passed redirectURL and scopes.
 func NewTerminal(redirectURL string, scopes ...string) Terminal {
 	return Terminal{
 		service: auth.NewService(auth.RedirectURL(redirectURL), auth.Scopes(scopes...)),
