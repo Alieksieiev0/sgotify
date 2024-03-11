@@ -6,34 +6,55 @@ import (
 	"reflect"
 )
 
+// ExternalURL contains known external URLs for the object.
 type ExternalURL struct {
+	// The Spotify URL for the object.
 	Spotify string `json:"spotify"`
 }
 
+// ExternalId contins known external IDs for the object.
 type ExternalId struct {
+	// International Standard Recording Code
 	Isrc string `json:"isrc"`
-	Ean  string `json:"ean"`
-	Upc  string `json:"upc"`
+	// International Article Number
+	Ean string `json:"ean"`
+	// Universal Product Code
+	Upc string `json:"upc"`
 }
 
+// Follower contains information about the followers of the object.
 type Follower struct {
-	Href  string  `json:"href"`
+	// This will always be set to null, as the Web API does not support it at the moment.
+	Href string `json:"href"`
+	// The total number of followers.
 	Total float64 `json:"total"`
 }
 
+// Image contains images of the object in various sizes, widest first.
 type Image struct {
-	URL    string  `json:"url"`
+	// The source URL of the image.
+	URL string `json:"url"`
+	// The image height in pixels.
 	Height float64 `json:"height"`
-	Width  float64 `json:"width"`
+	// The image width in pixels.
+	Width float64 `json:"width"`
 }
 
+// Restriction is included in the response when a content restriction is applied.
 type Restriction struct {
+	// The reason for the restriction.
+	// Objects may be restricted if the content is not available in a given market,
+	// to the user's subscription type, or when the user's account is set to not play explicit content.
+	// Additional reasons may be added in the future.
 	Reason string `json:"reason"`
 }
 
+// AudioResumePoint contains the user's most recent position
 type AudioResumePoint struct {
-	FullyPlayed      bool `json:"fully_played"`
-	ResumePositionMs int  `json:"resume_position_ms"`
+	// Whether or not the episode has been fully played by the user.
+	FullyPlayed bool `json:"fully_played"`
+	// The user's most recent position in the episode in milliseconds.
+	ResumePositionMs int `json:"resume_position_ms"`
 }
 
 // AudioRecording contains common fields for Spotify API audio recordings, such as
@@ -62,21 +83,32 @@ type AudioRecording struct {
 	Restrictions Restriction `json:"restrictions"`
 }
 
+// Item struct is used to correctly parse JSON "oneOf" type.
 type Item struct {
 	Artist  FullArtist
 	Track   FullTrack
 	Episode FullEpisode
-	Type    string
+	// Instead of checking every object for nil, this field can be used.
+	// Supported Types:
+	//
+	// - artist
+	//
+	// - track
+	//
+	// - episode
+	Type string
 }
 
 type ItemType int
 
-const itemTypeField = "Type"
+// Enum used to check on "oneOf" object type.
 const (
 	Artist ItemType = iota
 	Track
 	Episode
 )
+
+const itemTypeField = "Type"
 
 func (it ItemType) String() string {
 	switch it {
@@ -91,6 +123,8 @@ func (it ItemType) String() string {
 	return "missing type"
 }
 
+// UnmarshalJson is a custom Unmarshaler implementation,
+// used to parse "oneOf" type into one of the supported by Item struct types.
 func (i *Item) UnmarshalJSON(data []byte) error {
 	if len(data) == 0 || string(data) == "null" {
 		return nil
@@ -128,6 +162,8 @@ func (i *Item) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("unsupported item type")
 }
 
+// parse dynamically parses json into the appropriate Item field
+// and saves the type of the parsed object into "Type" field.
 func (i *Item) parse(data []byte, itemStruct interface{}, itemType, itemField string) error {
 	structValue := reflect.New(reflect.TypeOf(itemStruct)).Elem()
 	if err := json.Unmarshal(data, structValue.Addr().Interface()); err != nil {
@@ -140,6 +176,7 @@ func (i *Item) parse(data []byte, itemStruct interface{}, itemType, itemField st
 	return nil
 }
 
+// GetAvailableGenreSeeds obtains a list of available genres seed parameter values for recommendations.
 func (s *Spotify) GetAvailableGenreSeeds() (*[]string, error) {
 	var w struct {
 		Genres *[]string `json:"genres"`
@@ -148,6 +185,7 @@ func (s *Spotify) GetAvailableGenreSeeds() (*[]string, error) {
 	return w.Genres, err
 }
 
+// GetAvailableMarkets obtains the list of markets where Spotify is available.
 func (s *Spotify) GetAvailableMarkets() (*[]string, error) {
 	var w struct {
 		Markets *[]string `json:"markets"`

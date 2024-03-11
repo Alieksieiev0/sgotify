@@ -145,7 +145,7 @@ func TestCreatePlaylist(t *testing.T) {
 	server, spotify := testServer(testRelatedObjectHandler([]byte{}))
 	defer server.Close()
 
-	err := spotify.CreatePlaylist(testId, []Property{})
+	err := spotify.CreatePlaylist(testId, Name("test"), []Property{})
 	if err != nil {
 		t.Fatal(err)
 	}
