@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_buildUrl(t *testing.T) {
+func TestBuildUrl(t *testing.T) {
 	market := Market("ES")
 	limit := Limit(5)
 
@@ -20,7 +20,7 @@ func Test_buildUrl(t *testing.T) {
 	}
 }
 
-func Test_appendToQuery(t *testing.T) {
+func TestAppendToQuery(t *testing.T) {
 	groups := IncludeGroups("album,single")
 	offset := Offset(5)
 	parsedUrl, err := url.Parse("/test")

@@ -63,7 +63,7 @@ func TestFollowPlaylist(t *testing.T) {
 	server, spotify := testServer(testRelatedObjectHandler([]byte{}))
 	defer server.Close()
 
-	err := spotify.FollowPlaylist(testId, false)
+	err := spotify.FollowPlaylist(testId, []Property{})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -7,17 +7,40 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	ScopeUgcImageUpload            = "ugc-image-upload"
+	ScopeUserReadPlaybackState     = "user-read-playback-state"
+	ScopeUserModifyPlaybackState   = "user-modify-playback-state"
+	ScopeUserReadCurrentlyPlaying  = "user-read-currently-playing"
+	ScopeAppRemoteControl          = "app-remote-control"
+	ScopeStreaming                 = "streaming"
+	ScopePlaylistReadPrivate       = "playlist-read-private"
+	ScopePlaylistReadCollaborative = "playlist-read-collaborative"
+	ScopePlaylistModifyPrivate     = "playlist-modify-private"
+	ScopePlaylistModifyPublic      = "playlist-modify-public"
+	ScopeUserFollowModify          = "user-follow-modify"
+	ScopeUserFollowRead            = "user-follow-read"
+	ScopeUserReadPlaybackPosition  = "user-read-playback-position"
+	ScopeUserTopRead               = "user-top-read"
+	ScopeUserReadRecentlyPlayed    = "user-read-recently-played"
+	ScopeUserLibraryModify         = "user-library-modify"
+	ScopeUserLibraryRead           = "user-library-read"
+	ScopeUserReadEmail             = "user-read-email"
+	ScopeUserReadPrivate           = "user-read-private"
+	ScopeUserSoaLink               = "user-soa-link"
+	ScopeUserSoaUnlink             = "user-soa-unlink"
+	ScopeSoaManageEntitlements     = "soa-manage-entitlements"
+	ScopeSoaManagePartner          = "soa-manage-partner"
+	ScopeSoaCreatePartner          = "soa-create-partner"
+)
+
 type Service struct {
 	conf *oauth2.Config
 }
 
-func (s *Service) addOption(op option) {
-	op(s)
-}
-
-func (s *Service) addOptions(ops []option) {
-	for _, op := range ops {
-		op(s)
+func (s *Service) addOptions(opts ...option) {
+	for _, opt := range opts {
+		opt(s)
 	}
 }
 
@@ -33,7 +56,7 @@ func (s *Service) Exchange(
 	return s.conf.Exchange(ctx, code, opts...)
 }
 
-func NewService(ops ...option) Service {
+func NewService(opts ...option) Service {
 	s := Service{
 		conf: &oauth2.Config{
 			ClientID:     os.Getenv("SPOTIFY_CLIENT_ID"),
@@ -44,7 +67,7 @@ func NewService(ops ...option) Service {
 			},
 		},
 	}
-	s.addOptions(ops)
+	s.addOptions(opts...)
 
 	return s
 }
@@ -57,4 +80,8 @@ func RedirectURL(url string) option {
 	}
 }
 
-// Add scopes by using conf.Scopes
+func Scopes(scopes ...string) option {
+	return func(s *Service) {
+		s.conf.Scopes = scopes
+	}
+}

@@ -27,7 +27,7 @@ func TestTransferPlayback(t *testing.T) {
 	server, spotify := testServer(testHandler())
 	defer server.Close()
 
-	err := spotify.TransferPlayback([]string{"1,2"}, false)
+	err := spotify.TransferPlayback(DeviceIds([]string{"test"}), []Property{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func TestStartResumePlayback(t *testing.T) {
 	server, spotify := testServer(testHandler())
 	defer server.Close()
 
-	err := spotify.StartResumePlayback("test", []string{"test"}, nil, 5)
+	err := spotify.StartResumePlayback([]Property{})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -27,7 +27,7 @@ func TestChangePlaylistDetails(t *testing.T) {
 	server, spotify := testServer(testSingleIdHandler([]byte{}))
 	defer server.Close()
 
-	err := spotify.ChangePlaylistDetails(testId, "name", "descrip", false, false)
+	err := spotify.ChangePlaylistDetails(testId, []Property{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func TestUpdatePlaylistItems(t *testing.T) {
 	server, spotify := testServer(testRelatedObjectHandler(body))
 	defer server.Close()
 
-	snapshot, err := spotify.UpdatePlaylistItems(testId, "snapshotId", 1, 2, []string{"test"})
+	snapshot, err := spotify.UpdatePlaylistItems(testId, []Property{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +78,7 @@ func TestAddItemsToPlaylist(t *testing.T) {
 	server, spotify := testServer(testRelatedObjectHandler(body))
 	defer server.Close()
 
-	snapshot, err := spotify.AddItemsToPlaylist(testId, 1, []string{"test"})
+	snapshot, err := spotify.AddItemsToPlaylist(testId, []Property{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestRemovePlaylistItem(t *testing.T) {
 	server, spotify := testServer(testRelatedObjectHandler(body))
 	defer server.Close()
 
-	snapshot, err := spotify.RemovePlaylistItem(testId, "test", nil)
+	snapshot, err := spotify.RemovePlaylistItem(testId, []Property{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +145,7 @@ func TestCreatePlaylist(t *testing.T) {
 	server, spotify := testServer(testRelatedObjectHandler([]byte{}))
 	defer server.Close()
 
-	err := spotify.CreatePlaylist(testId, "name", "description", false, false)
+	err := spotify.CreatePlaylist(testId, []Property{})
 	if err != nil {
 		t.Fatal(err)
 	}

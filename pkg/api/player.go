@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -80,15 +79,8 @@ func (s *Spotify) GetPlaybackState(params ...Param) (*Playback, error) {
 	return playback, err
 }
 
-func (s *Spotify) TransferPlayback(deviceIds []string, play bool) error {
-	w := struct {
-		DeviceIds []string `json:"device_ids"`
-		Play      bool     `json:"play"`
-	}{
-		deviceIds,
-		play,
-	}
-	body, err := json.Marshal(w)
+func (s *Spotify) TransferPlayback(deviceIds Property, properties []Property) error {
+	body, err := createBodyFromProperties(append(properties, deviceIds))
 	if err != nil {
 		return err
 	}
@@ -109,25 +101,8 @@ func (s *Spotify) GetCurrentlyPlayingTrack(params ...Param) (*Playback, error) {
 	return playback, err
 }
 
-func (s *Spotify) StartResumePlayback(
-	contextUri string,
-	URIs []string,
-	offset interface{},
-	positionMs int,
-	params ...Param,
-) error {
-	w := struct {
-		ContextURI string      `json:"context_uri"`
-		URIs       []string    `json:"uris"`
-		Offset     interface{} `json:"offset"`
-		PositionMs int         `json:"position_ms"`
-	}{
-		contextUri,
-		URIs,
-		offset,
-		positionMs,
-	}
-	body, err := json.Marshal(w)
+func (s *Spotify) StartResumePlayback(properties []Property, params ...Param) error {
+	body, err := createBodyFromProperties(properties)
 	if err != nil {
 		return err
 	}

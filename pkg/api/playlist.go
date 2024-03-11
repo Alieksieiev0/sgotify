@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -58,22 +57,8 @@ func (s *Spotify) GetPlaylist(id string, params ...Param) (*FullPlaylist, error)
 	return playlist, err
 }
 
-func (s *Spotify) ChangePlaylistDetails(
-	id, name, description string,
-	public, collaborative bool,
-) error {
-	w := struct {
-		Name          string `json:"name"`
-		Public        bool   `json:"public"`
-		Collaborative bool   `json:"collaborative"`
-		Description   string `json:"description"`
-	}{
-		name,
-		public,
-		collaborative,
-		description,
-	}
-	body, err := json.Marshal(w)
+func (s *Spotify) ChangePlaylistDetails(id string, properties []Property) error {
+	body, err := createBodyFromProperties(properties)
 	if err != nil {
 		return err
 	}
@@ -88,24 +73,12 @@ func (s *Spotify) GetPlaylistItems(id string, params ...Param) (*PlaylistTrackCh
 }
 
 func (s *Spotify) UpdatePlaylistItems(
-	id, snapshotId string,
-	rangeStart, insertBefore int,
-	URIs []string,
+	id string,
+	properties []Property,
 	params ...Param,
 ) (*Snapshot, error) {
 	snapshot := &Snapshot{}
-	w := struct {
-		URIs         []string `json:"uris"`
-		RangeStart   int      `json:"range_start"`
-		InsertBefore int      `json:"insert_before"`
-		SnapshotId   string   `json:"snapshot_id"`
-	}{
-		URIs,
-		rangeStart,
-		insertBefore,
-		snapshotId,
-	}
-	body, err := json.Marshal(w)
+	body, err := createBodyFromProperties(properties)
 	if err != nil {
 		return nil, err
 	}
@@ -115,19 +88,11 @@ func (s *Spotify) UpdatePlaylistItems(
 
 func (s *Spotify) AddItemsToPlaylist(
 	id string,
-	position int,
-	URIs []string,
+	properties []Property,
 	params ...Param,
 ) (*Snapshot, error) {
 	snapshot := &Snapshot{}
-	w := struct {
-		URIs     []string `json:"uris"`
-		Position int      `json:"position"`
-	}{
-		URIs,
-		position,
-	}
-	body, err := json.Marshal(w)
+	body, err := createBodyFromProperties(properties)
 	if err != nil {
 		return nil, err
 	}
@@ -135,16 +100,9 @@ func (s *Spotify) AddItemsToPlaylist(
 	return snapshot, err
 }
 
-func (s *Spotify) RemovePlaylistItem(id, snapshotId string, tracks interface{}) (*Snapshot, error) {
+func (s *Spotify) RemovePlaylistItem(id string, properties []Property) (*Snapshot, error) {
 	snapshot := &Snapshot{}
-	w := struct {
-		Tracks     interface{} `json:"tracks"`
-		SnapshotId string      `json:"snapshot_id"`
-	}{
-		tracks,
-		snapshotId,
-	}
-	body, err := json.Marshal(w)
+	body, err := createBodyFromProperties(properties)
 	if err != nil {
 		return nil, err
 	}
@@ -167,22 +125,8 @@ func (s *Spotify) GetUserPlaylists(
 	return playlistChunk, err
 }
 
-func (s *Spotify) CreatePlaylist(
-	userId, name, description string,
-	public, collaborative bool,
-) error {
-	w := struct {
-		Name          string `json:"name"`
-		Public        bool   `json:"snapshot_id"`
-		Collaborative bool   `json:"collaborative"`
-		Description   string `json:"description"`
-	}{
-		name,
-		public,
-		collaborative,
-		description,
-	}
-	body, err := json.Marshal(w)
+func (s *Spotify) CreatePlaylist(userId string, properties []Property) error {
+	body, err := createBodyFromProperties(properties)
 	if err != nil {
 		return err
 	}

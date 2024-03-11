@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -44,13 +43,8 @@ func (s *Spotify) GetUserProfile(id string) (*User, error) {
 	return user, err
 }
 
-func (s *Spotify) FollowPlaylist(playlistId string, public bool) error {
-	w := struct {
-		Public bool `json:"public"`
-	}{
-		public,
-	}
-	body, err := json.Marshal(w)
+func (s *Spotify) FollowPlaylist(playlistId string, properties []Property) error {
+	body, err := createBodyFromProperties(properties)
 	if err != nil {
 		return err
 	}
