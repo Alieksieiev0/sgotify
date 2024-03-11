@@ -75,8 +75,8 @@ func handleCallback(code *string) http.HandlerFunc {
 	}
 }
 
-func NewTerminal(redirectURL string) Terminal {
+func NewTerminal(redirectURL string, scopes ...string) Terminal {
 	return Terminal{
-		service: auth.NewService(auth.RedirectURL(redirectURL)),
+		service: auth.NewService(auth.RedirectURL(redirectURL), auth.Scopes(scopes...)),
 	}
 }

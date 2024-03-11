@@ -2,10 +2,12 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 
 	"github.com/Alieksieiev0/sgotify/pkg/api"
+	"github.com/Alieksieiev0/sgotify/pkg/auth"
 	"github.com/Alieksieiev0/sgotify/pkg/services"
 	"github.com/joho/godotenv"
 )
@@ -16,7 +18,11 @@ func Run() {
 		log.Fatal("couldn`t load env", err)
 	}
 	ctx := context.Background()
-	term := services.NewTerminal("http://localhost:8888/callback")
+	term := services.NewTerminal(
+		"http://localhost:8888/callback",
+		auth.ScopeUserModifyPlaybackState,
+		auth.ScopePlaylistModifyPublic,
+	)
 	token, err := term.Authorize(ctx)
 	if err != nil {
 		fmt.Println(err)
@@ -24,17 +30,15 @@ func Run() {
 	}
 
 	spotify := api.NewSpotifyClient(ctx, token)
-	//spotify.StartResumePlayback("", []string{}, nil, 0)
-	artist, err := spotify.GetArtist("57dN52uHvrHOxijzpIgu3E")
+	track, err := spotify.GetTrack("4PTG3Z6ehGkBFwjybzWkR8")
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
-	fmt.Println(artist)
-	artists, err := spotify.GetArtists([]string{"0TnOYISbd1XYRBk9myaseg", "57dN52uHvrHOxijzpIgu3E"})
+
+	res, err := json.MarshalIndent(track, "", "    ")
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
-	fmt.Println(artists)
+
+	fmt.Println(string(res))
 }
