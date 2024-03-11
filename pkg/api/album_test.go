@@ -76,7 +76,7 @@ func TestGetUserSavedAlbums(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sourceAlbumChunk := &SimplifiedAlbumChunk{}
+	sourceAlbumChunk := &SavedAlbumChunk{}
 	testDiffs(t, body, sourceAlbumChunk, albumChunk)
 }
 

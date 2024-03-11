@@ -12,25 +12,38 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// Error contains the status and message that can be received from the Spotify API if the request fails.
 type Error struct {
 	Status  int    `json:"status"`
 	Message string `json:"message"`
 }
 
+// Spotify represents the Spotify API client, which provides all the functionality needed to communicate with the API.
 type Spotify struct {
 	client *http.Client
-	url    string
+	// The base url of the Spotify
+	url string
 }
 
+// spotifyRequestData is used to unify the parameters of the request functions into a single struct.
 type spotifyRequestData struct {
+	// The object used to store json.Unmarshal results.
 	response interface{}
-	method   string
+	// The method of the request.
+	// The methods used are GET, PUT, POST, DELETE.
+	method string
+	// The endpoint of the request.
 	endpoint string
-	params   []Param
-	headers  map[string]string
-	body     io.Reader
+	// The params of the request.
+	params []Param
+	// The headers of the request.
+	// The headers used are "Content-Type:application/json" and "Content-Type:image/jpeg".
+	headers map[string]string
+	// The body of the request.
+	body io.Reader
 }
 
+// Get is responsible for sending GET requests with the specified endpoint and parameters.
 func (s *Spotify) Get(response interface{}, endpoint string, params ...Param) error {
 	requestData := spotifyRequestData{
 		response,
@@ -44,6 +57,7 @@ func (s *Spotify) Get(response interface{}, endpoint string, params ...Param) er
 	return s.doRequest(requestData)
 }
 
+// Put is responsible for sending PUT requests with the specified endpoint, body and parameters.
 func (s *Spotify) Put(
 	response interface{},
 	endpoint string,
@@ -62,6 +76,7 @@ func (s *Spotify) Put(
 	return s.doRequest(requestData)
 }
 
+// PutImage is responsible for sending PUT requests with the specified endpoint, body containing base64 encoded image and parameters.
 func (s *Spotify) PutImage(
 	response interface{},
 	endpoint, body string,
@@ -79,6 +94,7 @@ func (s *Spotify) PutImage(
 	return s.doRequest(requestData)
 }
 
+// Post is responsible for sending POST requests with the specified endpoint, body and parameters.
 func (s *Spotify) Post(
 	response interface{},
 	endpoint string,
@@ -97,6 +113,7 @@ func (s *Spotify) Post(
 	return s.doRequest(requestData)
 }
 
+// Delete is responsible for sending DELETE requests with the specified endpoint, body and parameters.
 func (s *Spotify) Delete(
 	response interface{},
 	endpoint string,
@@ -115,6 +132,7 @@ func (s *Spotify) Delete(
 	return s.doRequest(requestData)
 }
 
+// doRequest responsible for connecting the create and send methods.
 func (s *Spotify) doRequest(data spotifyRequestData) error {
 	req, err := s.createRequest(data)
 	if err != nil {
@@ -124,6 +142,7 @@ func (s *Spotify) doRequest(data spotifyRequestData) error {
 	return s.sendRequest(data.response, req)
 }
 
+// createRequest responsible for creating the request with given spotifyRequestData.
 func (s *Spotify) createRequest(data spotifyRequestData) (*http.Request, error) {
 	endpoint, err := buildUrl(data.endpoint, data.params...)
 	if err != nil {
@@ -132,7 +151,6 @@ func (s *Spotify) createRequest(data spotifyRequestData) (*http.Request, error) 
 
 	req, err := http.NewRequest(data.method, s.url+endpoint, data.body)
 	if err != nil {
-		fmt.Println(1)
 		return nil, err
 	}
 	for k, v := range data.headers {
@@ -141,7 +159,9 @@ func (s *Spotify) createRequest(data spotifyRequestData) (*http.Request, error) 
 	return req, err
 }
 
-func (s *Spotify) sendRequest(resData interface{}, req *http.Request) error {
+// sendRequest sends a request to the Spotify API using the Spotify client and the created request.
+// Response data, if any, will be marshalled to the response object.
+func (s *Spotify) sendRequest(response interface{}, req *http.Request) error {
 	res, err := s.client.Do(req)
 	if err != nil {
 		return err
@@ -155,12 +175,13 @@ func (s *Spotify) sendRequest(resData interface{}, req *http.Request) error {
 	if res.StatusCode != http.StatusOK {
 		return s.handleError(body)
 	}
-	if resData == nil {
+	if response == nil {
 		return nil
 	}
-	return json.Unmarshal(body, resData)
+	return json.Unmarshal(body, response)
 }
 
+// handleError parses the error returned by the Spotify API and formats it into the Go error.
 func (s *Spotify) handleError(body []byte) error {
 	var w struct {
 		Error Error `json:"error"`
@@ -172,6 +193,7 @@ func (s *Spotify) handleError(body []byte) error {
 	return fmt.Errorf("spotify request error: %v", w.Error)
 }
 
+// NewSpotifyClient creates a Spotify client, with the appropriate Spotify base URL.
 func NewSpotifyClient(ctx context.Context, token *oauth2.Token) Spotify {
 	return Spotify{
 		oauth2.NewClient(ctx, oauth2.StaticTokenSource(token)),

@@ -36,14 +36,29 @@ type AudioResumePoint struct {
 	ResumePositionMs int  `json:"resume_position_ms"`
 }
 
+// AudioRecording contains common fields for Spotify API audio recordings, such as
+//
+// - Chatper
+//
+// - Episode
+//
+// - Track
 type AudioRecording struct {
-	DurationMs   int         `json:"duration_ms"`
-	Explicit     bool        `json:"explicit"`
+	// The audio recording length in milliseconds.
+	DurationMs int `json:"duration_ms"`
+	// Whether or not the audio recording has explicit content (true = yes it does; false = no it does not OR unknown).
+	Explicit bool `json:"explicit"`
+	// External URLs for this audio recording.
 	ExternalURLs ExternalURL `json:"external_urls"`
-	Href         string      `json:"href"`
-	Id           string      `json:"id"`
-	IsPlayable   bool        `json:"is_playable"`
-	Name         string      `json:"name"`
+	// A link to the Web API endpoint providing full details of the audio recording.
+	Href string `json:"href"`
+	// The Spotify ID for the audio recording.
+	Id string `json:"id"`
+	// True if the audio recording is playable in the given market. Otherwise false.
+	IsPlayable bool `json:"is_playable"`
+	// The name of the audio recording.
+	Name string `json:"name"`
+	// Included in the response when a content restriction is applied.
 	Restrictions Restriction `json:"restrictions"`
 }
 

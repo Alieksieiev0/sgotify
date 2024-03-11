@@ -7,12 +7,30 @@ import (
 
 type Param func(v *url.Values)
 
+// A comma-separated list of keywords that will be used to filter the response. If not supplied, all album types will be returned.
+//
+// Valid values are:
+//
+// - album
+//
+// - single
+//
+// - appears_on
+//
+// - compilation
+//
+// For example: include_groups=album,single.
 func IncludeGroups(keywords string) Param {
 	return func(v *url.Values) {
 		v.Add("include_groups", keywords)
 	}
 }
 
+// An ISO 3166-1 alpha-2 country code. If a country code is specified, only content that is available in that market will be returned.
+// If a valid user access token is specified in the request header, the country associated with the user account will take priority over this parameter.
+//
+// Note: If neither market or user country are provided, the content is considered unavailable for the client.
+// Users can view the country that is associated with their account in the account settings.
 func Market(name string) Param {
 	return func(v *url.Values) {
 		v.Add("market", name)
@@ -37,13 +55,13 @@ func Locale(name string) Param {
 	}
 }
 
+// The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50.
 func Limit(num int) Param {
 	return func(v *url.Values) {
 		v.Add("limit", strconv.Itoa(num))
 	}
 }
 
-// replace to work with dates
 func After(num int) Param {
 	return func(v *url.Values) {
 		v.Add("after", strconv.Itoa(num))
@@ -56,6 +74,7 @@ func Before(num int) Param {
 	}
 }
 
+// The index of the first item to return. Default: 0 (the first item). Use with limit to get the next set of items.
 func Offset(num int) Param {
 	return func(v *url.Values) {
 		v.Add("offset", strconv.Itoa(num))
