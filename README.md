@@ -1,6 +1,6 @@
 # Sgotify
 
-[![GoDoc] (https://pkg.go.dev/badge/github.com/Alieksieiev0/sgotify?status.svg)](https://godoc.org/github.com/Alieksieiev0/sgotify)
+[![GoDoc](https://pkg.go.dev/badge/github.com/Alieksieiev0/sgotify?status.svg)](https://godoc.org/github.com/Alieksieiev0/sgotify)
 Sgotify is a wrapper around the Spotify API written in Go. It supports all the endpoints listed in [Web API](https://developer.spotify.com/web-api/).
 
 # Install
