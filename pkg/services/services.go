@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	"github.com/Alieksieiev0/sgotify/pkg/auth"
@@ -23,7 +24,19 @@ type Terminal struct {
 // Authorize authorizes app, considering that the authorization was requested from Terminal.
 // It will open the auth link in default app, run callback server to capture the Authorization Code and exchange it.
 func (t Terminal) Authorize(ctx context.Context) (*oauth2.Token, error) {
-	err := exec.Command("xdg-open", t.service.AuthURL("state")).Start()
+	var cmd string
+	var args []string
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
+	}
+	args = append(args, t.service.AuthURL("state"))
+	err := exec.Command(cmd, args...).Start()
 	if err != nil {
 		log.Fatal("failure starting open command: ", err)
 	}
